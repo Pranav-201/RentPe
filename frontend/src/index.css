@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-main: #09090b;
+    --bg-card: #121215;
+    --border-subtle: #27272a;
+    --silver-glow: rgba(228, 228, 231, 0.08);
+  }
+
+  body {
+    background-color: #0d0f1a;
+    color: #f4f4f5;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+  }
+
+  /* Custom Minimal Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #09090b;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
+  }
+}
+
+@layer utilities {
+
+  /* Subtle Film Grain Noise Texture */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  /* Geometric Minimal Dots Pattern */
+  .bg-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Sleek Silver Metallic Card */
+  .silver-card {
+    background: rgba(18, 18, 21, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
+  }
+
+  .silver-card-hover {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .silver-card-hover:hover {
+    border-color: rgba(228, 228, 231, 0.25);
+    background: rgba(24, 24, 28, 0.85);
+    box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 255, 255, 0.03);
+  }
+
+  /* Silver Metallic Gradient Text */
+  .text-silver {
+    background: linear-gradient(180deg, #ffffff 0%, #e4e4e7 50%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-silver-muted {
+    background: linear-gradient(180deg, #d4d4d8 0%, #a1a1aa 50%, #71717a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Subtle Top Chrome Border Sheen */
+  .border-sheen {
+    position: relative;
+  }
+
+  .border-sheen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    pointer-events: none;
+  }
+
+  /* Standard page container for non-hero pages */
+  .page-container {
+    max-width: 80rem;
+    /* 1280px */
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2rem 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .page-container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* Toast Notification Animation */
+  @keyframes toast-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-toast-enter {
+    animation: toast-enter 0.2s ease-out forwards;
+  }
+}
