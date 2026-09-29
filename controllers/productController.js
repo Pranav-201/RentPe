@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import Inventory from "../models/Inventory.js";
 import Review from "../models/Review.js";
 import { getPaginationParams } from "../utils/pagination.js";
+import { rentpeRagService } from "../services/rentpeRagService.js";
 
 export async function getAllProducts(req, res) {
   try {
@@ -158,6 +159,11 @@ export async function createProduct(req, res) {
     });
     await inventory.save();
 
+    // Sync listing with vector store (non-blocking)
+    Product.findById(product._id).populate("category").then((populated) => {
+      if (populated) rentpeRagService.indexListing(populated);
+    }).catch((err) => console.warn("Vector sync error on create:", err.message));
+
     res.created({
       message: "Rental item listed successfully",
       product
@@ -189,6 +195,11 @@ export async function updateProduct(req, res) {
       runValidators: true
     }).populate("category");
 
+    // Sync updated listing with vector store (non-blocking)
+    if (updated) {
+      rentpeRagService.indexListing(updated).catch((err) => console.warn("Vector sync error on update:", err.message));
+    }
+
     res.ok({
       message: "Rental item updated successfully",
       product: updated
@@ -216,6 +227,9 @@ export async function deleteProduct(req, res) {
 
     product.isActive = false;
     await product.save();
+
+    // Remove from vector store (non-blocking)
+    rentpeRagService.deleteListingFromIndex(product._id).catch((err) => console.warn("Vector delete sync error:", err.message));
 
     res.ok({
       message: "Rental item removed successfully"

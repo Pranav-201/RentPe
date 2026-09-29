@@ -1,5 +1,5 @@
-import { GroqProvider,GeminiProvider } from "zingoo";
-
+import { GroqProvider, GeminiProvider } from "zingoo";
+import { rentpeRagService } from "../services/rentpeRagService.js";
 
 const SYSTEM_INSTRUCTION = `You are RentPe AI Assistant.
 
@@ -25,7 +25,7 @@ export function createAIController(app) {
   return {
     async handleChat(req, res) {
       try {
-        const { message } = req.body || {};
+        const { message, smartSearch, isSmartSearch } = req.body || {};
 
         if (!message || typeof message !== "string" || !message.trim()) {
           return res.badRequest({
@@ -34,30 +34,43 @@ export function createAIController(app) {
           });
         }
 
-        const apiKey = process.env.GROQ_API_KEY;
+        // Handle Smart Search mode with Zingoo RAG
+        if (smartSearch || isSmartSearch) {
+          try {
+            const ragResult = await rentpeRagService.smartSearch(app, message.trim());
+            return res.ok(ragResult);
+          } catch (ragError) {
+            console.error("Smart Search RAG Error:", ragError);
+            return res.serverError({
+              success: false,
+              message: "Sorry, I couldn't perform smart search right now. Please try again."
+            });
+          }
+        }
+
+        // Standard Chatbot Mode
+        const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-          console.warn("GROQ_API_KEY environment variable is not configured.");
+          console.warn("AI API key (GROQ_API_KEY or GEMINI_API_KEY) is not configured.");
           return res.serverError({
             success: false,
             message: "Sorry, I couldn't process that request right now. Please try again."
           });
         }
 
-        const ai = new GroqProvider({
-          apiKey,
-          model: process.env.GROQ_MODEL || "openai/gpt-oss-120b"
-        
-        });
-        
-
-        // fallback to grok api
-        // const fallback = new GeminiProvider({
-        // apiKey,
-        // model: "gemini-3.8-flash"
-        // });
-        
-        
+        let ai;
+        if (process.env.GROQ_API_KEY) {
+          ai = new GroqProvider({
+            apiKey: process.env.GROQ_API_KEY,
+            model: process.env.GROQ_MODEL || "openai/gpt-oss-120b"
+          });
+        } else {
+          ai = new GeminiProvider({
+            apiKey: process.env.GEMINI_API_KEY,
+            model: process.env.GEMINI_MODEL || "gemini-1.5-flash"
+          });
+        }
 
         const response = await app.ai(ai).generate(message.trim(), {
           temperature: 0.2,
@@ -79,3 +92,4 @@ export function createAIController(app) {
     }
   };
 }
+
