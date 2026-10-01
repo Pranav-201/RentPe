@@ -123,6 +123,18 @@
     }
   }
 
+  @media (min-width: 1536px) {
+    .page-container {
+      max-width: 96rem;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .page-container {
+      max-width: 112rem;
+    }
+  }
+
   /* Toast Notification Animation */
   @keyframes toast-enter {
     0% {

@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
       {/* ═══════════════════════════════════════════════════════
           BROWSE — Page 2
       ═══════════════════════════════════════════════════════ */}
-      <section id="browse-section" className="px-4 sm:px-6 lg:px-8 xl:px-12 py-14 space-y-8 max-w-screen-xl mx-auto">
+      <section id="browse-section" className="px-4 sm:px-6 lg:px-8 xl:px-12 py-14 space-y-8 max-w-screen-xl min-[1536px]:max-w-[96rem] min-[1920px]:max-w-[112rem] mx-auto">
         {/* Section header */}
         <div className="flex items-end justify-between border-b border-zinc-800/60 pb-5">
           <div>
@@ -130,7 +130,7 @@ export const HomePage: React.FC = () => {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 min-[2200px]:grid-cols-6 gap-4 sm:gap-6">
             {products.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
