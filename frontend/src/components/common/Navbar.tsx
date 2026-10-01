@@ -96,52 +96,64 @@ export const Navbar: React.FC = () => {
                       className="fixed inset-0 z-40"
                       onClick={() => setIsUserMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-zinc-900/95 border border-zinc-800 shadow-2xl backdrop-blur-xl z-50 p-2 text-xs">
-                      <div className="p-2 border-b border-zinc-800 mb-1">
-                        <p className="font-semibold text-zinc-100 truncate">{user?.name}</p>
-                        <p className="text-[11px] text-zinc-400 truncate">{user?.email}</p>
-                        <div className="mt-1 flex items-center gap-1.5">
-                          <span className="text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full border bg-zinc-800/80 text-zinc-300 border-zinc-700 font-mono">
-                            {user?.collegeName || 'Student Member'}
-                          </span>
+                    <div className="absolute right-0 mt-3 w-72 overflow-hidden rounded-2xl border border-zinc-700/80 bg-[#16171b]/95 shadow-2xl shadow-black/40 backdrop-blur-xl z-50 text-xs">
+                      <div className="border-b border-zinc-800/90 bg-gradient-to-br from-zinc-800/80 via-zinc-900/70 to-[#16171b] p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-600/80 bg-zinc-800 text-sm font-bold text-zinc-100 shadow-inner">
+                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
+                            <p className="mt-0.5 truncate text-[11px] text-zinc-400">{user?.email}</p>
+                          </div>
                         </div>
+                        <span className="mt-3 inline-flex rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider text-zinc-300">
+                          {user?.collegeName || 'Student Member'}
+                        </span>
                       </div>
+
+                      <div className="p-2">
 
                       <Link
                         to="/admin"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-zinc-200 hover:text-white hover:bg-zinc-800 transition-colors font-medium"
+                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-zinc-200 transition-colors hover:bg-zinc-800 hover:text-white font-medium"
                       >
-                        <PlusCircle className="w-3.5 h-3.5 text-zinc-400" /> List & Manage Items
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-800/80 text-zinc-400 transition-colors group-hover:bg-zinc-700 group-hover:text-white"><PlusCircle className="w-3.5 h-3.5" /></span>
+                        <span>List & Manage Items</span>
                       </Link>
 
                       <Link
                         to="/orders"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors font-medium"
+                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white font-medium"
                       >
-                        <Package className="w-3.5 h-3.5 text-zinc-400" /> My Rentals
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-800/80 text-zinc-400 transition-colors group-hover:bg-zinc-700 group-hover:text-white"><Package className="w-3.5 h-3.5" /></span>
+                        <span>My Rentals</span>
                       </Link>
 
                       <Link
                         to="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors font-medium"
+                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white font-medium"
                       >
-                        <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Profile & Address
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-800/80 text-zinc-400 transition-colors group-hover:bg-zinc-700 group-hover:text-white"><UserIcon className="w-3.5 h-3.5" /></span>
+                        <span>Profile & Address</span>
                       </Link>
 
-                      <div className="border-t border-zinc-800 my-1" />
+                      <div className="my-2 border-t border-zinc-800" />
 
                       <button
                         onClick={() => {
                           setIsUserMenuOpen(false);
                           logout();
                         }}
-                        className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-950/20 transition-colors font-medium"
+                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-rose-400 transition-colors hover:bg-rose-950/40 font-medium"
                       >
-                        <LogOut className="w-3.5 h-3.5" /> Sign out
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-950/30 text-rose-400 transition-colors group-hover:bg-rose-950/60"><LogOut className="w-3.5 h-3.5" /></span>
+                        <span>Sign out</span>
                       </button>
+                      </div>
                     </div>
                   </>
                 )}

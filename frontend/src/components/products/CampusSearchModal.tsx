@@ -191,22 +191,32 @@ export const CampusSearchModal: React.FC<CampusSearchModalProps> = ({ isOpen, on
         .no-scrollbar::-webkit-scrollbar { display:none; }
         .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
 
-        /* Solid Dark Black Theme - Zero Transparency */
+        /* Campus explorer theme */
         .campus-solid-window {
-          background-color: #08090c;
+          background:
+            linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+            #0a0a0a;
+          background-size: 28px 28px;
         }
 
         .campus-solid-card {
-          background-color: #0e1015;
-          border: 1px solid #1e222b;
-          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          background: #f4f4f0;
+          border: 3px solid #050505;
+          box-shadow: 7px 7px 0 #050505;
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
         }
 
         .campus-solid-card:hover {
-          background-color: #12151c;
-          border-color: #3b4252;
-          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85);
-          transform: translateY(-2px);
+          background: #ffffff;
+          border-color: #050505;
+          box-shadow: 10px 10px 0 #050505;
+          transform: translate(-3px, -3px);
+        }
+
+        .campus-solid-card:active {
+          box-shadow: 2px 2px 0 #050505;
+          transform: translate(5px, 5px);
         }
 
         /* Boxes Loader Styles */
@@ -444,7 +454,7 @@ export const CampusSearchModal: React.FC<CampusSearchModalProps> = ({ isOpen, on
         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-zinc-600 to-transparent" />
 
         {/* Header - Solid Dark */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e222b] bg-[#08090c] flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0d0d0d]/90 flex-shrink-0">
           <div className="flex items-center gap-3">
             {view === 'campus-products' && (
               <button
@@ -489,7 +499,7 @@ export const CampusSearchModal: React.FC<CampusSearchModalProps> = ({ isOpen, on
         </div>
 
         {/* Scrollable body */}
-        <div ref={scrollRef} className="overflow-y-auto no-scrollbar flex-1 bg-[#08090c]" style={{ minHeight: 0 }}>
+        <div ref={scrollRef} className="overflow-y-auto no-scrollbar flex-1 bg-transparent" style={{ minHeight: 0 }}>
           {isScanning ? (
             /* ═══ BOXES SCANNING LOADER ═══ */
             <div className="p-8 flex flex-col items-center justify-center text-center min-h-[300px] space-y-6 animate-in fade-in duration-300">
@@ -514,7 +524,7 @@ export const CampusSearchModal: React.FC<CampusSearchModalProps> = ({ isOpen, on
 
               {/* ═══ CAMPUS LIST (Solid Dark) ═══ */}
               {view === 'campus-list' && (
-                <div className="cs-rev p-6 space-y-5">
+                <div className="cs-rev p-5 sm:p-6 space-y-5">
                   {campusError && (
                     <p className="text-center py-8 text-xs text-rose-400">{campusError}</p>
                   )}
@@ -555,14 +565,19 @@ export const CampusSearchModal: React.FC<CampusSearchModalProps> = ({ isOpen, on
                   ) : (
                     <div>
                       {/* Sub-bar */}
-                      <div className="flex items-center justify-between pb-3 mb-1 border-b border-[#1e222b]">
-                        <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold">
-                          <Radio className="w-3.5 h-3.5 text-zinc-400" />
-                          <span>Discovered Campuses ({campuses.length})</span>
+                      <div className="flex items-center justify-between gap-3 pb-4 mb-1 border-b border-white/10">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
+                            <Radio className="w-3.5 h-3.5" />
+                            <span>Live campus network</span>
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-zinc-100">
+                            Choose a campus to explore
+                          </p>
                         </div>
                         <button
                           onClick={handleScanAgain}
-                          className="group flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#12151c] hover:bg-[#1a1e27] border border-[#1e222b] hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white shadow-sm transition-all cursor-pointer"
+                          className="group flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-[11px] font-semibold text-zinc-300 hover:text-white shadow-sm transition-all cursor-pointer"
                         >
                           <RotateCw className="w-3 h-3 text-zinc-400 group-hover:text-white group-hover:rotate-180 transition-all duration-500" />
                           <span>Rescan</span>
@@ -570,41 +585,42 @@ export const CampusSearchModal: React.FC<CampusSearchModalProps> = ({ isOpen, on
                       </div>
 
                       {/* Campus Cards Grid - Solid Opaque Dark Black (No Transparency) */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
                         {campuses.map((campus, i) => (
                           <button
                             key={campus.college}
                             onClick={() => goToCampus(campus)}
-                            className="cs-card-in campus-solid-card group relative text-left rounded-2xl p-5 cursor-pointer overflow-hidden active:scale-[0.99] flex flex-col justify-between"
+                            className="cs-card-in campus-solid-card group relative text-left rounded-none p-5 cursor-pointer overflow-hidden flex flex-col justify-between min-h-[164px]"
                             style={{ animationDelay: `${i * 45}ms` }}
                           >
-                            {/* Card Top Specular Highlight */}
-                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-700 to-transparent group-hover:via-zinc-500 transition-all duration-300 pointer-events-none" />
-
                             {/* Card Top / Header */}
                             <div className="relative z-10 flex items-start justify-between gap-3">
                               <div className="min-w-0 pr-2">
-                                <h4 className="text-[15px] font-bold text-white group-hover:text-zinc-100 transition-colors tracking-tight line-clamp-1">
+                                <div className="mb-3 inline-flex items-center gap-1.5 border-2 border-black bg-black px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-white">
+                                  <Radio className="h-3 w-3" />
+                                  Live campus
+                                </div>
+                                <h4 className="text-[17px] font-black uppercase text-black tracking-tight line-clamp-1">
                                   {campus.college}
                                 </h4>
-                                <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5 font-normal">
-                                  <Building2 className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                                <p className="text-xs text-zinc-700 mt-1.5 flex items-center gap-1.5 font-bold">
+                                  <Building2 className="w-3.5 h-3.5 text-black flex-shrink-0" />
                                   <span className="truncate">Verified Campus Community</span>
                                 </p>
                               </div>
 
-                              <div className="w-7 h-7 rounded-lg bg-[#161820] border border-[#272c38] group-hover:bg-white group-hover:text-black group-hover:border-white flex items-center justify-center text-zinc-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-sm flex-shrink-0">
+                              <div className="w-9 h-9 border-2 border-black bg-white group-hover:bg-black group-hover:text-white flex items-center justify-center text-black transition-colors flex-shrink-0">
                                 <ArrowUpRight className="w-3.5 h-3.5" />
                               </div>
                             </div>
 
                             {/* Card Bottom Divider + Stats */}
-                            <div className="relative z-10 flex items-center justify-between pt-3 mt-4 border-t border-[#1e222b]">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#08090c] border border-[#1e222b] text-zinc-200 font-mono text-[11px] font-semibold group-hover:border-zinc-700 transition-colors">
-                                <Package className="w-3 h-3 text-zinc-400" />
+                            <div className="relative z-10 flex items-center justify-between pt-3 mt-4 border-t-2 border-black">
+                              <span className="inline-flex items-center gap-1.5 border-2 border-black bg-white px-2.5 py-1 text-[11px] font-black text-black">
+                                <Package className="w-3 h-3" />
                                 {campus.count} rental{campus.count !== 1 ? 's' : ''}
                               </span>
-                              <span className="text-[11px] font-medium text-zinc-400 group-hover:text-white transition-colors flex items-center gap-1 font-mono">
+                              <span className="text-[11px] font-black uppercase text-black transition-colors flex items-center gap-1">
                                 Explore →
                               </span>
                             </div>
