@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Package, Folder, Layers, ShoppingBag, LogIn, PlusCircle } from 'lucide-react';
+import { Sparkles, Package, ShoppingBag, LogIn, PlusCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ProductManager } from '../components/admin/ProductManager';
-import { CategoryManager } from '../components/admin/CategoryManager';
-import { InventoryManager } from '../components/admin/InventoryManager';
 import { OrderManager } from '../components/admin/OrderManager';
 
 export const AdminDashboardPage: React.FC = () => {
-  const { isAuthenticated, user, loading: authLoading, switchDemoUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'inventory' | 'orders'>('products');
+  const { isAuthenticated, loading: authLoading, switchDemoUser } = useAuth();
+  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
+  const [pendingTab, setPendingTab] = useState<'products' | 'orders' | null>(null);
   const [loggingIn, setLoggingIn] = useState(false);
+
+  useEffect(() => {
+    if (!pendingTab) return;
+
+    const timer = window.setTimeout(() => {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }, 3000);
+
+    return () => window.clearTimeout(timer);
+  }, [pendingTab]);
 
   if (authLoading) {
     return (
@@ -62,8 +72,6 @@ export const AdminDashboardPage: React.FC = () => {
 
   const tabs = [
     { id: 'products', label: 'Rental Listings', icon: Package },
-    { id: 'categories', label: 'Categories', icon: Folder },
-    { id: 'inventory', label: 'Inventory & Stock', icon: Layers },
     { id: 'orders', label: 'Rental Requests & Orders', icon: ShoppingBag },
   ] as const;
 
@@ -72,13 +80,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-300 uppercase tracking-wider mb-1">
-            <Sparkles className="w-3 h-3 text-zinc-400" /> Student Rental Hub
-          </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">List & Manage Items</h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Logged in as <span className="text-zinc-200 font-semibold">{user?.name}</span> {user?.collegeName ? `(${user.collegeName})` : ''}
-          </p>
         </div>
 
         {/* Tab Switcher */}
@@ -89,7 +91,9 @@ export const AdminDashboardPage: React.FC = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (tab.id !== activeTab) setPendingTab(tab.id);
+                }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
                     ? 'bg-zinc-100 text-zinc-950 shadow-sm'
@@ -105,11 +109,21 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Active Tab Panel */}
-      <div className="animate-in fade-in duration-200">
-        {activeTab === 'products' && <ProductManager />}
-        {activeTab === 'categories' && <CategoryManager />}
-        {activeTab === 'inventory' && <InventoryManager />}
-        {activeTab === 'orders' && <OrderManager />}
+      <div key={pendingTab || activeTab} className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+        {pendingTab ? (
+          <div className="admin-tab-loader" aria-label="Loading rental requests">
+            <div className="admin-tab-loader-dot" />
+            <div className="admin-tab-loader-dot" />
+            <div className="admin-tab-loader-dot" />
+            <div className="admin-tab-loader-dot" />
+            <div className="admin-tab-loader-dot" />
+          </div>
+        ) : (
+          <>
+            {activeTab === 'products' && <ProductManager />}
+            {activeTab === 'orders' && <OrderManager />}
+          </>
+        )}
       </div>
     </div>
   );

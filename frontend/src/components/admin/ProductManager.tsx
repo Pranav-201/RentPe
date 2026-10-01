@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, Search, RefreshCw, PackageOpen, GraduationCap, Building2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Plus, Edit2, Trash2, Search, RefreshCw, PackageOpen, GraduationCap, Building2, Camera, Upload, Image as ImageIcon } from 'lucide-react';
 import { Product, Category } from '../../types';
 import { productService, ProductPayload, ProductStatus } from '../../services/productService';
 import { categoryService } from '../../services/categoryService';
@@ -29,6 +29,8 @@ export const ProductManager: React.FC = () => {
   const [customCollege, setCustomCollege] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const { success, error } = useToast();
 
@@ -67,7 +69,7 @@ export const ProductManager: React.FC = () => {
       sku: `RENT-${Date.now().toString(36).toUpperCase()}`,
       location: defaultCampus,
       tags: ['student', 'campus'],
-      images: [{ url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80', alt: 'Rental Item' }],
+      images: [],
     });
     setCustomCollege(false);
     setTagInput('student, campus');
@@ -151,6 +153,22 @@ export const ProductManager: React.FC = () => {
     } catch (err: any) {
       error(err.message || 'Failed to update listing status');
     }
+  };
+
+  const handlePhotoSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = String(reader.result || '');
+      setFormData((prev) => ({
+        ...prev,
+        images: [{ url, alt: prev.name || 'Rental Item' }],
+      }));
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
   };
 
   const filteredProducts = products.filter((p) => {
@@ -320,35 +338,36 @@ export const ProductManager: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         title={editingProduct ? 'Edit Rental Item' : 'List New Rental Item'}
         maxWidth="lg"
+        tone="graphite"
       >
-        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-5 text-xs font-sans">
           <div>
-            <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Item Name *</label>
+            <label className="block text-zinc-300 mb-1.5 font-semibold text-[11px]">Item Name <span className="text-zinc-500">*</span></label>
             <input
               type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
               placeholder="e.g. Casio fx-991EX Scientific Calculator / Lab Coat / Drafter"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Listing SKU Code *</label>
+              <label className="block text-zinc-300 mb-1.5 font-semibold text-[11px]">Listing SKU Code <span className="text-zinc-500">*</span></label>
               <input
                 type="text"
                 required
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 uppercase font-mono focus:outline-none focus:border-zinc-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-100 uppercase font-mono focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
                 placeholder="RENT-001"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-zinc-400 font-medium font-mono text-[11px]">Category *</label>
+                <label className="block text-zinc-300 font-semibold text-[11px]">Category <span className="text-zinc-500">*</span></label>
                 <button
                   type="button"
                   onClick={async () => {
@@ -372,7 +391,7 @@ export const ProductManager: React.FC = () => {
                 required
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
               >
                 <option value="">Select Category</option>
                 {categories.map((c) => (
@@ -387,11 +406,11 @@ export const ProductManager: React.FC = () => {
           {/* Campus / College Selection */}
           <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="text-zinc-300 font-medium font-mono text-[11px] flex items-center gap-1.5">
+              <label className="text-zinc-300 font-semibold text-sm flex items-center gap-1.5">
                 <GraduationCap className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Campus / College Location *</span>
               </label>
-              <span className="text-[10px] text-zinc-500 font-mono">Visible in Campus Search</span>
+              <span className="text-[10px] text-zinc-500">Visible in Campus Search</span>
             </div>
 
             <div className="flex rounded-lg bg-zinc-900 p-0.5 border border-zinc-800 text-[11px] font-medium">
@@ -433,7 +452,7 @@ export const ProductManager: React.FC = () => {
                   required={customCollege}
                   value={formData.location || ''}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 text-xs focus:outline-none focus:border-zinc-500"
+                  className="w-full px-5 py-3.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 placeholder:text-zinc-500 text-base focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
                   placeholder="Enter college/university name (e.g. DTU, BITS Pilani, IIT Bombay, DU)..."
                 />
                 <div className="flex flex-wrap gap-1">
@@ -456,7 +475,7 @@ export const ProductManager: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Rental Price (₹/day) *</label>
+              <label className="block text-zinc-300 mb-2.5 font-semibold text-sm">Rental Price (₹/day) <span className="text-zinc-500">*</span></label>
               <input
                 type="number"
                 step="1"
@@ -464,11 +483,11 @@ export const ProductManager: React.FC = () => {
                 required
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 font-mono"
+                className="w-full px-5 py-3.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 text-base focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all font-mono"
               />
             </div>
             <div>
-              <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Discount Rate (₹/day optional)</label>
+              <label className="block text-zinc-300 mb-2.5 font-semibold text-sm">Discount Rate (₹/day optional)</label>
               <input
                 type="number"
                 step="1"
@@ -477,42 +496,78 @@ export const ProductManager: React.FC = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, discountPrice: parseFloat(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 font-mono"
+                className="w-full px-5 py-3.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 text-base focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3.5 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <label className="block text-zinc-300 font-semibold text-[11px]">Item Photo</label>
+                <p className="text-[10px] text-zinc-500 mt-1">Use a clear photo so students can recognize the item.</p>
+              </div>
+              <ImageIcon className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+            </div>
+
+            {formData.images?.[0]?.url && (
+              <div className="relative h-32 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                <img src={formData.images[0].url} alt="Item preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-[11px] font-semibold text-zinc-200 hover:border-zinc-500 hover:text-white transition-colors"
+              >
+                <Camera className="w-3.5 h-3.5" /> Take Photo
+              </button>
+              <button
+                type="button"
+                onClick={() => uploadInputRef.current?.click()}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-[11px] font-semibold text-zinc-200 hover:border-zinc-500 hover:text-white transition-colors"
+              >
+                <Upload className="w-3.5 h-3.5" /> Upload Photo
+              </button>
+            </div>
+
+            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoSelected} className="hidden" />
+            <input ref={uploadInputRef} type="file" accept="image/*" onChange={handlePhotoSelected} className="hidden" />
+
+            <div>
+              <label className="block text-zinc-500 mb-1 text-[10px]">Or paste an image URL</label>
+              <input
+                type="url"
+                value={formData.images?.[0]?.url?.startsWith('data:') ? '' : formData.images?.[0]?.url || ''}
+                onChange={(e) => setFormData({ ...formData, images: [{ url: e.target.value, alt: formData.name }] })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
+                placeholder="https://images.unsplash.com/..."
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Image URL</label>
-            <input
-              type="url"
-              value={formData.images?.[0]?.url || ''}
-              onChange={(e) => setFormData({ ...formData, images: [{ url: e.target.value, alt: formData.name }] })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500"
-              placeholder="https://images.unsplash.com/..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Description (min 10 chars) *</label>
+            <label className="block text-zinc-300 mb-2.5 font-semibold text-sm">Description (min 10 chars) <span className="text-zinc-500">*</span></label>
             <textarea
               rows={3}
               required
               minLength={10}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 resize-none"
+              className="w-full px-5 py-3.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 text-base focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all resize-none"
               placeholder="Describe item condition, accessories included, campus pickup location..."
             />
           </div>
 
           <div>
-            <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Tags (comma separated)</label>
+            <label className="block text-zinc-300 mb-2.5 font-semibold text-sm">Tags (comma separated)</label>
             <input
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500"
+              className="w-full px-5 py-3.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 text-base focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
               placeholder="calculator, lab, exam, hostel"
             />
           </div>

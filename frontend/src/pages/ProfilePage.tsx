@@ -80,9 +80,12 @@ export const ProfilePage: React.FC = () => {
     .slice(0, 1)
     .toUpperCase() + (lastName ? lastName.slice(0, 1).toUpperCase() : '');
 
+  const labelClass = 'block text-sm font-semibold text-zinc-300 mb-2.5';
+  const fieldClass = 'w-full px-5 py-3.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 text-base focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all placeholder:text-zinc-500';
+
   return (
-    <div className="page-container py-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="page-container py-10">
+      <div className="max-w-4xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-6">
           <Settings className="w-4 h-4 text-zinc-400" />
@@ -160,7 +163,7 @@ export const ProfilePage: React.FC = () => {
               {/* Names 2-Col Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  <label className={labelClass}>
                     First Name
                   </label>
                   <input
@@ -169,12 +172,12 @@ export const ProfilePage: React.FC = () => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="First name"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                    className={fieldClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  <label className={labelClass}>
                     Last Name
                   </label>
                   <input
@@ -182,14 +185,14 @@ export const ProfilePage: React.FC = () => {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Last name"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                    className={fieldClass}
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                <label className={labelClass}>
                   Email
                 </label>
                 <div className="relative flex items-center">
@@ -197,7 +200,7 @@ export const ProfilePage: React.FC = () => {
                     type="email"
                     disabled
                     value={user?.email || ''}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80 text-zinc-400 text-xs md:text-sm cursor-not-allowed font-mono"
+                    className={`${fieldClass} bg-[#141517] text-zinc-400 cursor-not-allowed font-mono`}
                   />
                   <span className="absolute right-3 text-[10px] text-zinc-500 font-mono">
                     read-only
@@ -207,10 +210,10 @@ export const ProfilePage: React.FC = () => {
 
               {/* Phone Number */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                <label className={labelClass}>
                   Phone Number
                 </label>
-                <div className="flex items-center rounded-lg bg-zinc-900/90 border border-zinc-800 focus-within:border-zinc-500 transition-colors px-3 py-1">
+                <div className="flex items-center rounded-xl bg-[#18191b] border border-[#303238] focus-within:border-zinc-500 focus-within:ring-1 focus-within:ring-zinc-500/30 transition-all px-4 py-1.5">
                   <span className="text-sm mr-2 select-none" role="img" aria-label="India flag">
                     🇮🇳
                   </span>
@@ -219,14 +222,14 @@ export const ProfilePage: React.FC = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91-83283-92296"
-                    className="w-full py-1.5 bg-transparent text-zinc-100 text-xs md:text-sm focus:outline-none placeholder:text-zinc-600"
+                    className="w-full py-2 bg-transparent text-zinc-100 text-base focus:outline-none placeholder:text-zinc-500"
                   />
                 </div>
               </div>
 
               {/* College / Organization */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                <label className={labelClass}>
                   College / Campus or Company
                 </label>
                 <input
@@ -234,13 +237,13 @@ export const ProfilePage: React.FC = () => {
                   value={collegeName}
                   onChange={(e) => setCollegeName(e.target.value)}
                   placeholder="e.g. IIT Bombay / Product Designer At Accenture"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  className={fieldClass}
                 />
               </div>
 
               {/* Student ID / Roll No */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                <label className={labelClass}>
                   Student ID / Roll No (Optional)
                 </label>
                 <input
@@ -248,7 +251,7 @@ export const ProfilePage: React.FC = () => {
                   value={collegeId}
                   onChange={(e) => setCollegeId(e.target.value)}
                   placeholder="e.g. 21BCE1042"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  className={fieldClass}
                 />
               </div>
             </>
@@ -258,7 +261,7 @@ export const ProfilePage: React.FC = () => {
             <>
               {/* Street */}
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                <label className={labelClass}>
                   Street / Hostel / Room No
                 </label>
                 <input
@@ -266,14 +269,14 @@ export const ProfilePage: React.FC = () => {
                   value={address.street}
                   onChange={(e) => setAddress({ ...address, street: e.target.value })}
                   placeholder="e.g. Room 204, Hostel Block A"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  className={fieldClass}
                 />
               </div>
 
               {/* City & State */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  <label className={labelClass}>
                     City
                   </label>
                   <input
@@ -281,12 +284,12 @@ export const ProfilePage: React.FC = () => {
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
                     placeholder="City"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                    className={fieldClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  <label className={labelClass}>
                     State
                   </label>
                   <input
@@ -294,7 +297,7 @@ export const ProfilePage: React.FC = () => {
                     value={address.state}
                     onChange={(e) => setAddress({ ...address, state: e.target.value })}
                     placeholder="State"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                    className={fieldClass}
                   />
                 </div>
               </div>
@@ -302,7 +305,7 @@ export const ProfilePage: React.FC = () => {
               {/* Zip Code & Country */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  <label className={labelClass}>
                     Zip Code
                   </label>
                   <input
@@ -310,12 +313,12 @@ export const ProfilePage: React.FC = () => {
                     value={address.zipCode}
                     onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
                     placeholder="e.g. 400076"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                    className={fieldClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  <label className={labelClass}>
                     Country
                   </label>
                   <input
@@ -323,7 +326,7 @@ export const ProfilePage: React.FC = () => {
                     value={address.country}
                     onChange={(e) => setAddress({ ...address, country: e.target.value })}
                     placeholder="India"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                    className={fieldClass}
                   />
                 </div>
               </div>

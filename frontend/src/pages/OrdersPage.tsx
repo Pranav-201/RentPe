@@ -95,7 +95,7 @@ export const OrdersPage: React.FC = () => {
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {['', 'pending', 'accepted', 'declined', 'confirmed', 'delivered', 'cancelled'].map((st) => (
+          {['', 'pending', 'accepted', 'declined'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}

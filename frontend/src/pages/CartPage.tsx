@@ -91,6 +91,12 @@ export const CartPage: React.FC = () => {
 
   const handleMessageOwner = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      error('Please read and accept the rental terms before messaging the owner');
+      navigate('/terms');
+      return;
+    }
+
     if (!selectedItem || !selectedProduct) {
       error('Please select an item to rent');
       return;
@@ -366,11 +372,12 @@ export const CartPage: React.FC = () => {
                 </div>
 
                 <button
-                  type="submit"
+                  type={activeOrder ? 'button' : 'submit'}
+                  onClick={activeOrder ? () => setIsChatOpen(true) : undefined}
                   disabled={submitting}
                   className="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-md shadow-violet-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                 >
-                  <MessageSquare className="w-4 h-4" /> {submitting ? 'Sending Request...' : 'Message Owner'}
+                  <MessageSquare className="w-4 h-4" /> {activeOrder ? 'See Messages' : submitting ? 'Sending Request...' : 'Message Owner'}
                 </button>
               </div>
             </form>

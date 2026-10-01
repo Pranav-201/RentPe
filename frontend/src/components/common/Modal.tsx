@@ -7,6 +7,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  tone?: 'default' | 'graphite';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -15,6 +16,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   children,
   maxWidth = 'md',
+  tone = 'default',
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,9 +54,9 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Dialog container */}
       <div
-        className={`relative w-full ${maxWidths[maxWidth]} bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 z-10 max-h-[90vh] overflow-y-auto`}
+        className={`relative w-full ${maxWidths[maxWidth]} ${tone === 'graphite' ? 'bg-[#111214] border-[#303238]' : 'bg-slate-900 border-slate-800'} border rounded-2xl shadow-2xl p-6 z-10 max-h-[90vh] overflow-y-auto`}
       >
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <div className={`flex items-center justify-between pb-4 mb-4 ${tone === 'graphite' ? 'border-[#303238]' : 'border-slate-800'} border-b`}>
           <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
           <button
             onClick={onClose}

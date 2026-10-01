@@ -65,9 +65,9 @@ export const CartDrawer: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 4px 14px rgba(124,58,237,0.4)' }}
+                style={{ background: 'linear-gradient(135deg,#fafafa,#a1a1aa)', boxShadow: '0 4px 14px rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.55)' }}
               >
-                <ShoppingBag className="w-4 h-4 text-white" />
+                <ShoppingBag className="w-4 h-4 text-zinc-950" />
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white leading-tight">Rental Cart</h2>
