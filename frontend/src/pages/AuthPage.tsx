@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, Mail, User as UserIcon, ArrowRight, Sparkles, Phone, GraduationCap, Building2 } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Lock, Mail, User as UserIcon, ArrowRight, Phone, GraduationCap, Building2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const AuthPage: React.FC = () => {
@@ -14,7 +14,7 @@ export const AuthPage: React.FC = () => {
   const [collegeName, setCollegeName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, register, switchDemoUser } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,201 +47,78 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = async (role: 'admin' | 'customer') => {
-    try {
-      setLoading(true);
-      await switchDemoUser(role);
-      navigate('/');
-    } catch {
-      // Handled
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const inputClass = "w-full pl-9 pr-3 py-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all text-xs";
+  const inputClass = "w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all text-sm";
 
   return (
-    <div className="w-full flex flex-col justify-center items-center px-4 py-4 sm:py-6 my-auto">
-      <div className="w-full max-w-[440px] sm:max-w-[480px] space-y-4 sm:space-y-5">
-        {/* Header */}
-        <div className="text-center space-y-1.5">
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            {isRegister ? 'Join RentPe' : 'Welcome Back'}
-          </h1>
-          <p className="text-xs text-zinc-400">
-            {isRegister ? 'Create your verified student account to rent & list' : 'Sign in to access your rentals and listings'}
-          </p>
+    <div className="w-full min-h-screen flex items-center justify-center bg-[#070709] px-3 py-2 sm:px-6 sm:py-4 lg:px-10">
+      <div className="w-full max-w-6xl flex flex-col items-center gap-3">
+        <Link to="/" aria-label="Go to RentPe home" className="self-start">
+          <img src="/rentpe-logo.png" alt="RentPe" className="h-14 sm:h-16 w-auto object-contain" />
+        </Link>
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] overflow-hidden rounded-2xl border border-zinc-800 bg-[#111214] shadow-2xl shadow-black/50">
+        <div className="relative hidden lg:flex min-h-[440px] flex-col justify-between overflow-hidden p-7 bg-[#09090b]">
+          <img src="/image.png" alt="Campus rental items" className="absolute inset-0 w-full h-full object-cover opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/75 via-[#09090b]/25 to-[#050505]/95" />
+          
+         
         </div>
 
-        {/* Demo Account Quick Switcher */}
-        <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 space-y-2 silver-card">
-          <div className="flex items-center justify-between text-xs font-semibold text-zinc-300">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Instant Demo Access
-            </span>
-            <span className="text-[10px] text-zinc-400 font-mono">One-click login</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('customer')}
-            disabled={loading}
-            className="w-full p-2.5 sm:p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 hover:border-zinc-700 text-left transition-all flex items-center justify-between group"
-          >
-            <div>
-              <span className="font-bold text-xs text-zinc-200 flex items-center gap-1.5">
-                <UserIcon className="w-3.5 h-3.5 text-zinc-400" /> Demo Student Account
-              </span>
-              <span className="text-[10px] text-zinc-400 font-mono block mt-0.5">student@rentpe.com (IIT Delhi)</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-
-        {/* Auth Card */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-zinc-900/85 border border-zinc-800/90 shadow-2xl space-y-5 silver-card">
-          {/* Switch Tab */}
-          <div className="flex rounded-xl bg-zinc-950 p-1 border border-zinc-800 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setIsRegister(false)}
-              className={`flex-1 py-2 rounded-lg transition-all ${
-                !isRegister ? 'bg-zinc-100 text-zinc-950 shadow-sm font-bold' : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsRegister(true)}
-              className={`flex-1 py-2 rounded-lg transition-all ${
-                isRegister ? 'bg-zinc-100 text-zinc-950 shadow-sm font-bold' : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Register
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
-            {/* ── Register-only fields ── */}
-            {isRegister && (
-              <>
-                {/* Full Name */}
-                <div>
-                  <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Full Name *</label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className={inputClass}
-                      placeholder="Your full name"
-                    />
-                  </div>
-                </div>
-
-                {/* Phone & College ID side-by-side on sm+ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Phone Number *</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                      <input
-                        type="tel"
-                        required
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className={inputClass}
-                        placeholder="+91 98765 43210"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Student / College ID *</label>
-                    <div className="relative">
-                      <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                      <input
-                        type="text"
-                        required
-                        minLength={2}
-                        value={collegeId}
-                        onChange={(e) => setCollegeId(e.target.value)}
-                        className={inputClass}
-                        placeholder="e.g. 21CS1234"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* College Name */}
-                <div>
-                  <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">College / University Name *</label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                    <input
-                      type="text"
-                      required
-                      minLength={2}
-                      value={collegeName}
-                      onChange={(e) => setCollegeName(e.target.value)}
-                      className={inputClass}
-                      placeholder="e.g. IIT Delhi"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* ── Always-shown fields ── */}
-            <div>
-              <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Email Address *</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={inputClass}
-                  placeholder="you@college.edu"
-                />
-              </div>
+        <div className="flex items-center bg-[#111214] px-5 py-5 sm:px-8 lg:px-12">
+          <div className="w-full max-w-xl mx-auto space-y-3">
+            <div className="space-y-1.5">
+              <h1 className={`${isRegister ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'} font-semibold tracking-tight text-white`}>
+                {isRegister ? 'Create your account' : 'Welcome back'}
+              </h1>
+              <p className="text-sm text-zinc-400">
+                {isRegister ? 'Join your campus rental community.' : 'Sign in to access your rentals and listings.'}
+              </p>
             </div>
 
-            <div>
-              <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Password *</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={inputClass}
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="flex border-b border-white/10 text-sm font-semibold">
+              <button type="button" onClick={() => setIsRegister(false)} className={`flex-1 border-b-2 py-3 transition-colors ${!isRegister ? 'border-white text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}>Sign In</button>
+              <button type="button" onClick={() => setIsRegister(true)} className={`flex-1 border-b-2 py-3 transition-colors ${isRegister ? 'border-white text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}>Register</button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 active:scale-[0.99] mt-2 cursor-pointer"
-            >
-              {loading ? (
-                <span>Authenticating...</span>
-              ) : (
+            <form onSubmit={handleSubmit} className="space-y-2 text-xs">
+              {isRegister && (
                 <>
-                  {isRegister ? 'Join RentPe' : 'Sign In'} <ArrowRight className="w-4 h-4" />
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Full Name</label>
+                    <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="text" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Your full name" /></div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Phone Number</label>
+                      <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+91 98765 43210" /></div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Student / College ID</label>
+                      <div className="relative"><GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="text" required minLength={2} value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputClass} placeholder="e.g. 21CS1234" /></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold text-zinc-300">College / University Name</label>
+                    <div className="relative"><Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="text" required minLength={2} value={collegeName} onChange={(e) => setCollegeName(e.target.value)} className={inputClass} placeholder="e.g. IIT Delhi" /></div>
+                  </div>
                 </>
               )}
-            </button>
-          </form>
+
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Email Address</label>
+                <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="you@college.edu" /></div>
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Password</label>
+                <div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} placeholder="Enter your password" /></div>
+              </div>
+
+              <button type="submit" disabled={loading} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-bold text-zinc-950 shadow-lg shadow-black/20 transition-all hover:bg-zinc-200 active:scale-[0.99] disabled:opacity-50">
+                {loading ? 'Authenticating...' : isRegister ? 'Create account' : 'Sign in'} <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Package, ShoppingBag, LogIn, PlusCircle } from 'lucide-react';
+import { Package, ShoppingBag, LogIn, PlusCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ProductManager } from '../components/admin/ProductManager';
 import { OrderManager } from '../components/admin/OrderManager';
 
 export const AdminDashboardPage: React.FC = () => {
-  const { isAuthenticated, loading: authLoading, switchDemoUser } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
   const [pendingTab, setPendingTab] = useState<'products' | 'orders' | null>(null);
-  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
     if (!pendingTab) return;
@@ -49,22 +48,6 @@ export const AdminDashboardPage: React.FC = () => {
           >
             <LogIn className="w-4 h-4" /> Sign In / Register
           </Link>
-          <button
-            onClick={async () => {
-              setLoggingIn(true);
-              await switchDemoUser('admin');
-              setLoggingIn(false);
-            }}
-            disabled={loggingIn}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-semibold shadow-sm transition-all"
-          >
-            {loggingIn ? (
-              <div className="w-3.5 h-3.5 border-2 border-zinc-400 border-t-white rounded-full animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-            )}
-            Quick Demo Login
-          </button>
         </div>
       </div>
     );

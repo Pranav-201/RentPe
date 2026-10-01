@@ -19,7 +19,7 @@ export const RootLayout: React.FC = () => {
 
       {/* Main Layout Elements */}
       <div className="relative z-10 flex-1 flex flex-col">
-        <Navbar />
+        {!isAuthPage && <Navbar />}
         <main className={`flex-1 w-full ${isAuthPage ? 'flex flex-col justify-center items-center' : ''}`}>
           <Outlet />
         </main>
