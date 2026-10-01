@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   ArrowLeft,
@@ -10,8 +11,9 @@ import {
   XCircle,
   Loader2
 } from 'lucide-react';
-import { Product, Order, User } from '../../types';
+import { Product, Order, OrderMessage, User } from '../../types';
 import { orderService } from '../../services/orderService';
+import { getChatSocket } from '../../services/chatSocket';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
@@ -61,7 +63,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
   totalPrice: directTotal = 0,
   onStatusChange,
 }) => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, token } = useAuth();
   const { success, error } = useToast();
 
   const [activeOrder, setActiveOrder] = useState<Order | null>(propOrder || null);
@@ -164,6 +166,46 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    if (!isOpen || !activeOrder?._id || !token) return;
+
+    const socket = getChatSocket(token);
+    const handleNewMessage = (message: OrderMessage & { order?: string }) => {
+      if (message.order && String(message.order) !== String(activeOrder._id)) return;
+
+      setMessages((prev) => {
+        if (message._id && prev.some((item) => item.id === message._id)) {
+          return prev;
+        }
+
+        const senderId = typeof message.sender === 'object' ? message.sender._id : message.sender;
+        return [
+          ...prev,
+          {
+            id: message._id || `msg-${Date.now()}`,
+            senderId: String(senderId),
+            senderName: String(senderId) === String(currentUser?._id) ? 'You' : (message.senderName || otherName),
+            text: message.text,
+            timestamp: message.createdAt
+              ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : '',
+            isSender: String(senderId) === String(currentUser?._id),
+          }
+        ];
+      });
+    };
+
+    const joinRoom = () => socket.emit('joinConversation', activeOrder._id);
+    socket.on('newMessage', handleNewMessage);
+    socket.on('connect', joinRoom);
+    joinRoom();
+
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+      socket.off('connect', joinRoom);
+    };
+  }, [isOpen, activeOrder?._id, token, currentUser?._id, otherName]);
+
   if (!isOpen) return null;
 
   // Handle message send
@@ -171,28 +213,28 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
     const text = inputText.trim();
     if (!text || sending) return;
 
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    // Local optimistic message
-    const optimisticMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      senderId: currentUser?._id || 'user',
-      senderName: 'You',
-      text,
-      timestamp: timeStr,
-      isSender: true,
-    };
-
-    setMessages((prev) => [...prev, optimisticMsg]);
     setInputText('');
 
     if (activeOrder?._id) {
       try {
         setSending(true);
-        const res = await orderService.addMessage(activeOrder._id, text);
-        setActiveOrder(res.order);
-        if (onStatusChange) onStatusChange(res.order);
+        const socket = token ? getChatSocket(token) : null;
+
+        if (socket?.connected) {
+          await new Promise<void>((resolve, reject) => {
+            socket.emit('sendMessage', {
+              conversationId: activeOrder._id,
+              text,
+            }, (result: { ok: boolean; error?: string }) => {
+              if (result?.ok) resolve();
+              else reject(new Error(result?.error || 'Failed to send message'));
+            });
+          });
+        } else {
+          const res = await orderService.addMessage(activeOrder._id, text);
+          setActiveOrder(res.order);
+          if (onStatusChange) onStatusChange(res.order);
+        }
       } catch (err: any) {
         error(err.message || 'Failed to send message');
       } finally {
@@ -244,9 +286,9 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
   const isAccepted = activeOrder?.status === 'accepted' || activeOrder?.status === 'confirmed';
   const isDeclined = activeOrder?.status === 'declined' || activeOrder?.status === 'cancelled';
 
-  return (
+  return createPortal((
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150"
       onClick={onClose}
     >
       {/* Compact Chat Modal Window */}
@@ -529,5 +571,5 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 };

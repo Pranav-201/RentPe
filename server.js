@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { createApp } from "./app.js";
 import { connectDB, disconnectDB } from "./config/database.js";
+import { initializeSocket } from "./services/socketService.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -8,6 +9,7 @@ async function startServer() {
   try {
     await connectDB();
     const app = createApp();
+    initializeSocket(app.server);
 
     app.listen(PORT, () => {
       console.log(`

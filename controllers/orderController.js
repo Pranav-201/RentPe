@@ -5,6 +5,13 @@ import CartItem from "../models/CartItem.js";
 import Product from "../models/Product.js";
 import Inventory from "../models/Inventory.js";
 import { getPaginationParams } from "../utils/pagination.js";
+import {
+  attachOrderMessages,
+  createMessage,
+  getConversationOrder,
+  isConversationParticipant
+} from "../services/chatService.js";
+import { emitNewMessage } from "../services/socketService.js";
 
 export async function createOrder(req, res) {
   try {
@@ -126,17 +133,11 @@ export async function createOrder(req, res) {
       paymentStatus: "pending",
       status: "pending",
       notes: initialMessage,
-      messages: [
-        {
-          sender: req.user._id,
-          senderName: req.user.name || "Customer",
-          text: initialMessage,
-          createdAt: new Date()
-        }
-      ]
     });
 
     await order.save();
+    const initialOrderMessage = await createMessage(order._id, req.user, initialMessage);
+    emitNewMessage(order._id, initialOrderMessage);
 
     const populatedOrder = await Order.findById(order._id)
       .populate("user", "name email phone collegeName collegeId avatar")
@@ -151,9 +152,11 @@ export async function createOrder(req, res) {
         }
       });
 
+    const [orderWithMessages] = await attachOrderMessages([populatedOrder]);
+
     res.created({
       message: "Rental request sent to owner successfully",
-      order: populatedOrder
+      order: orderWithMessages
     });
   } catch (error) {
     res.serverError({ error: error.message });
@@ -207,8 +210,10 @@ export async function getOrders(req, res) {
 
     const total = await Order.countDocuments(filter);
 
+    const ordersWithMessages = await attachOrderMessages(orders);
+
     res.ok({
-      orders,
+      orders: ordersWithMessages,
       pagination: {
         page,
         limit,
@@ -240,7 +245,8 @@ export async function getOrderById(req, res) {
       return res.notFound({ error: "Order not found" });
     }
 
-    res.ok({ order });
+    const [orderWithMessages] = await attachOrderMessages([order]);
+    res.ok({ order: orderWithMessages });
   } catch (error) {
     res.serverError({ error: error.message });
   }
@@ -255,22 +261,13 @@ export async function updateOrderStatus(req, res) {
       return res.notFound({ error: "Order not found" });
     }
 
+    let statusMessage = null;
     if (status) {
       order.status = status;
       if (status === "accepted") {
-        order.messages.push({
-          sender: req.user._id,
-          senderName: req.user.name || "Owner",
-          text: "✅ Request Accepted! Let's chat to finalize pickup timing and campus location.",
-          createdAt: new Date()
-        });
+        statusMessage = "✅ Request Accepted! Let's chat to finalize pickup timing and campus location.";
       } else if (status === "declined") {
-        order.messages.push({
-          sender: req.user._id,
-          senderName: req.user.name || "Owner",
-          text: "❌ Request Declined. This item is currently unavailable.",
-          createdAt: new Date()
-        });
+        statusMessage = "❌ Request Declined. This item is currently unavailable.";
       }
     }
 
@@ -279,6 +276,11 @@ export async function updateOrderStatus(req, res) {
     }
 
     await order.save();
+
+    if (statusMessage) {
+      const message = await createMessage(order._id, req.user, statusMessage);
+      emitNewMessage(order._id, message);
+    }
 
     const updatedOrder = await Order.findById(order._id)
       .populate("user", "name email phone collegeName collegeId avatar")
@@ -293,9 +295,11 @@ export async function updateOrderStatus(req, res) {
         }
       });
 
+    const [orderWithMessages] = await attachOrderMessages([updatedOrder]);
+
     res.ok({
       message: `Order status updated to ${status || paymentStatus}`,
-      order: updatedOrder
+      order: orderWithMessages
     });
   } catch (error) {
     res.serverError({ error: error.message });
@@ -309,20 +313,17 @@ export async function addOrderMessage(req, res) {
       return res.badRequest({ error: "Message text is required" });
     }
 
-    const order = await Order.findById(req.params.id);
+    const order = await getConversationOrder(req.params.id);
     if (!order) {
       return res.notFound({ error: "Order not found" });
     }
 
-    const newMessage = {
-      sender: req.user._id,
-      senderName: req.user.name || "User",
-      text: text.trim(),
-      createdAt: new Date()
-    };
+    if (!isConversationParticipant(order, req.user)) {
+      return res.forbidden({ error: "Not authorized for this conversation" });
+    }
 
-    order.messages.push(newMessage);
-    await order.save();
+    const newMessage = await createMessage(order._id, req.user, text);
+    emitNewMessage(order._id, newMessage);
 
     const updatedOrder = await Order.findById(order._id)
       .populate("user", "name email phone collegeName collegeId avatar")
@@ -337,9 +338,11 @@ export async function addOrderMessage(req, res) {
         }
       });
 
+    const [orderWithMessages] = await attachOrderMessages([updatedOrder]);
+
     res.ok({
       message: "Message sent successfully",
-      order: updatedOrder
+      order: orderWithMessages
     });
   } catch (error) {
     res.serverError({ error: error.message });
