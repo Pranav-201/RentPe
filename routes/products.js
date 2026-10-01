@@ -1,5 +1,6 @@
 import { authenticate } from "../middleware/auth.js";
 import { validate, validationSchemas } from "../middleware/validation.js";
+import { uploadProductImages } from "../middleware/productImageUpload.js";
 import {
   getAllProducts,
   getProductById,
@@ -23,6 +24,7 @@ export function setupProductRoutes(app) {
   app.post(
     "/api/products",
     authenticate,
+    uploadProductImages,
     validate(validationSchemas.product),
     createProduct
   );
@@ -30,6 +32,7 @@ export function setupProductRoutes(app) {
   app.put(
     "/api/products/:id",
     authenticate,
+    uploadProductImages,
     validate(validationSchemas.product),
     updateProduct
   );

@@ -1,0 +1,15 @@
+diff --git a/node_modules/zingoo/src/body-parser.js b/node_modules/zingoo/src/body-parser.js
+index 0f7c6be..33255e4 100644
+--- a/node_modules/zingoo/src/body-parser.js
++++ b/node_modules/zingoo/src/body-parser.js
+@@ -14,5 +14,10 @@ class BodyParser {
+     const contentType =
+       req.headers["content-type"] || "";
+ 
++    // Multipart bodies must remain readable for route-level upload middleware.
++    if (contentType.includes("multipart/form-data")) {
++      return null;
++    }
++
+     const chunks = [];
+     let totalSize = 0;

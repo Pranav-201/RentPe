@@ -71,13 +71,17 @@ export const productService = {
     return res.data;
   },
 
-  async create(data: ProductPayload): Promise<{ message: string; product: Product }> {
-    const res = await apiClient.post<{ message: string; product: Product }>('/products', data);
+  async create(data: FormData): Promise<{ message: string; product: Product }> {
+    const res = await apiClient.post<{ message: string; product: Product }>('/products', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data;
   },
 
-  async update(id: string, data: Partial<ProductPayload>): Promise<{ message: string; product: Product }> {
-    const res = await apiClient.put<{ message: string; product: Product }>(`/products/${id}`, data);
+  async update(id: string, data: FormData): Promise<{ message: string; product: Product }> {
+    const res = await apiClient.put<{ message: string; product: Product }>(`/products/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data;
   },
 

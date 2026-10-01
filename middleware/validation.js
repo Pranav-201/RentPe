@@ -61,7 +61,7 @@ export const validationSchemas = {
     images: Joi.array()
       .items(
         Joi.object({
-          url: Joi.string().required(),
+          url: Joi.string().uri({ scheme: ["http", "https"] }).required(),
           alt: Joi.string().optional()
         })
       )

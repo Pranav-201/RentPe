@@ -29,6 +29,9 @@ export const ProductManager: React.FC = () => {
   const [customCollege, setCustomCollege] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
+  const [selectedImagePreviews, setSelectedImagePreviews] = useState<string[]>([]);
+  const [pastedImageUrl, setPastedImageUrl] = useState('');
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +60,12 @@ export const ProductManager: React.FC = () => {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    const previews = selectedImageFiles.map((file) => URL.createObjectURL(file));
+    setSelectedImagePreviews(previews);
+    return () => previews.forEach((url) => URL.revokeObjectURL(url));
+  }, [selectedImageFiles]);
+
   const openCreateModal = () => {
     setEditingProduct(null);
     const defaultCampus = user?.collegeName || 'IIT Delhi';
@@ -73,6 +82,8 @@ export const ProductManager: React.FC = () => {
     });
     setCustomCollege(false);
     setTagInput('student, campus');
+    setSelectedImageFiles([]);
+    setPastedImageUrl('');
     setIsModalOpen(true);
   };
 
@@ -94,6 +105,8 @@ export const ProductManager: React.FC = () => {
     });
     setCustomCollege(prodCampus.toLowerCase() !== userCampus.toLowerCase());
     setTagInput((product.tags || []).join(', '));
+    setSelectedImageFiles([]);
+    setPastedImageUrl('');
     setIsModalOpen(true);
   };
 
@@ -116,13 +129,26 @@ export const ProductManager: React.FC = () => {
       discountPrice: formData.discountPrice ? Number(formData.discountPrice) : undefined,
     };
 
+    const uploadData = new FormData();
+    uploadData.append('name', payload.name);
+    uploadData.append('description', payload.description);
+    uploadData.append('price', String(payload.price));
+    uploadData.append('category', payload.category);
+    uploadData.append('sku', payload.sku);
+    if (payload.discountPrice !== undefined) uploadData.append('discountPrice', String(payload.discountPrice));
+    if (payload.location) uploadData.append('location', payload.location);
+    uploadData.append('tags', JSON.stringify(payload.tags || []));
+    uploadData.append('existingImages', JSON.stringify(payload.images || []));
+    if (pastedImageUrl.trim()) uploadData.append('remoteImageUrls', JSON.stringify([pastedImageUrl.trim()]));
+    selectedImageFiles.forEach((file) => uploadData.append('images', file));
+
     try {
       setSaving(true);
       if (editingProduct) {
-        await productService.update(editingProduct._id, payload);
+        await productService.update(editingProduct._id, uploadData);
         success('Rental listing updated successfully');
       } else {
-        await productService.create(payload);
+        await productService.create(uploadData);
         success('Item listed successfully! Other students can now browse and rent it.');
       }
       setIsModalOpen(false);
@@ -156,18 +182,19 @@ export const ProductManager: React.FC = () => {
   };
 
   const handlePhotoSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const validFiles = files.filter((file) => allowedTypes.includes(file.type) && file.size <= 5 * 1024 * 1024);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const url = String(reader.result || '');
-      setFormData((prev) => ({
-        ...prev,
-        images: [{ url, alt: prev.name || 'Rental Item' }],
-      }));
-    };
-    reader.readAsDataURL(file);
+    if (validFiles.length !== files.length) {
+      error('Use JPEG, PNG, or WebP images no larger than 5 MB each.');
+    }
+
+    setSelectedImageFiles((current) => {
+      const next = [...current, ...validFiles].slice(0, 5);
+      if (next.length < current.length + validFiles.length) error('You can upload up to 5 product images.');
+      return next;
+    });
     event.target.value = '';
   };
 
@@ -510,11 +537,26 @@ export const ProductManager: React.FC = () => {
               <ImageIcon className="w-4 h-4 text-zinc-500 flex-shrink-0" />
             </div>
 
-            {formData.images?.[0]?.url && (
-              <div className="relative h-32 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
-                <img src={formData.images[0].url} alt="Item preview" className="w-full h-full object-cover" />
+            {(formData.images?.length || selectedImagePreviews.length || pastedImageUrl) ? (
+              <div className="grid grid-cols-3 gap-2">
+                {formData.images?.map((image, index) => (
+                  <div key={`${image.url}-${index}`} className="relative h-24 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                    <img src={image.url} alt={image.alt || 'Item preview'} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                {selectedImagePreviews.map((url) => (
+                  <div key={url} className="relative h-24 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                    <img src={url} alt="New item preview" className="w-full h-full object-cover" />
+                    <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-white">New</span>
+                  </div>
+                ))}
+                {pastedImageUrl && (
+                  <div className="relative h-24 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                    <img src={pastedImageUrl} alt="Pasted item preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
               </div>
-            )}
+            ) : null}
 
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -533,15 +575,15 @@ export const ProductManager: React.FC = () => {
               </button>
             </div>
 
-            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoSelected} className="hidden" />
-            <input ref={uploadInputRef} type="file" accept="image/*" onChange={handlePhotoSelected} className="hidden" />
+            <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={handlePhotoSelected} className="hidden" />
+            <input ref={uploadInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handlePhotoSelected} className="hidden" />
 
             <div>
               <label className="block text-zinc-500 mb-1 text-[10px]">Or paste an image URL</label>
               <input
                 type="url"
-                value={formData.images?.[0]?.url?.startsWith('data:') ? '' : formData.images?.[0]?.url || ''}
-                onChange={(e) => setFormData({ ...formData, images: [{ url: e.target.value, alt: formData.name }] })}
+                value={pastedImageUrl}
+                onChange={(e) => setPastedImageUrl(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all"
                 placeholder="https://images.unsplash.com/..."
               />

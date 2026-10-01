@@ -4,6 +4,53 @@ import Inventory from "../models/Inventory.js";
 import Review from "../models/Review.js";
 import { getPaginationParams } from "../utils/pagination.js";
 import { rentpeRagService } from "../services/rentpeRagService.js";
+import { uploadProductImage, uploadProductImageBuffer } from "../services/cloudinaryService.js";
+
+function isHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+async function resolveProductImages(req, name) {
+  const existingImages = Array.isArray(req.body.images) ? req.body.images : [];
+  const files = req.files || [];
+  const legacyImages = req.legacyImageSources || [];
+  const remoteImageUrls = req.remoteImageUrls || [];
+
+  if (!files.length && !legacyImages.length && !remoteImageUrls.length) {
+    return existingImages;
+  }
+
+  const uploadedFileImages = await Promise.all(
+    files.map(async (file) => ({
+      url: await uploadProductImageBuffer(file.buffer),
+      alt: name || file.originalname || "Rental Item"
+    }))
+  );
+
+  const migratedLegacyImages = await Promise.all(
+    legacyImages.map(async (image) => ({
+      url: await uploadProductImage(image.url),
+      alt: image.alt || name || "Rental Item"
+    }))
+  );
+
+  const uploadedRemoteImages = await Promise.all(
+    remoteImageUrls.map(async (url) => {
+      if (!isHttpUrl(url)) throw new Error("Image URLs must use HTTP or HTTPS");
+      return {
+        url: await uploadProductImage(url),
+        alt: name || "Rental Item"
+      };
+    })
+  );
+
+  return [...existingImages, ...migratedLegacyImages, ...uploadedRemoteImages, ...uploadedFileImages];
+}
 
 export async function getAllProducts(req, res) {
   try {
@@ -162,6 +209,7 @@ export async function getMyListings(req, res) {
 export async function createProduct(req, res) {
   try {
     const { name, description, price, pricePerDay, securityDeposit, condition, location, category, sku, tags, images } = req.body;
+    const resolvedImages = await resolveProductImages(req, name);
 
     const finalPrice = pricePerDay !== undefined ? pricePerDay : (price !== undefined ? price : 50);
     const generatedSku = sku || `RENT-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
@@ -177,7 +225,7 @@ export async function createProduct(req, res) {
       category,
       sku: generatedSku,
       tags: tags || [],
-      images: images && images.length ? images : [{ url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80", alt: name }],
+      images: resolvedImages.length ? resolvedImages : [{ url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80", alt: name }],
       isAvailable: true,
       status: "Available",
       createdBy: req.user._id,
@@ -225,7 +273,12 @@ export async function updateProduct(req, res) {
       return res.forbidden({ error: "You can only update your own listings" });
     }
 
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const resolvedImages = await resolveProductImages(req, req.body.name || product.name);
+    const updateData = { ...req.body };
+    if (resolvedImages.length) updateData.images = resolvedImages;
+    else delete updateData.images;
+
+    const updated = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true
     }).populate("category");
@@ -351,4 +404,3 @@ export async function getCampuses(req, res) {
     res.serverError({ error: error.message });
   }
 }
-    
