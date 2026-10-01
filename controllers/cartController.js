@@ -1,12 +1,17 @@
 import Cart from "../models/Cart.js";
 import CartItem from "../models/CartItem.js";
 import Product from "../models/Product.js";
-import Inventory from "../models/Inventory.js";
 
 async function getPopulatedCart(userId) {
   return await Cart.findOne({ user: userId }).populate({
     path: "items",
-    populate: { path: "product" }
+    populate: {
+      path: "product",
+      populate: [
+        { path: "owner", select: "name email collegeName phone avatar" },
+        { path: "createdBy", select: "name email collegeName phone avatar" }
+      ]
+    }
   });
 }
 
@@ -35,11 +40,8 @@ export async function addCartItem(req, res) {
       return res.notFound({ error: "Product not found" });
     }
 
-    const inventory = await Inventory.findOne({ product: productId });
-    if (!inventory || inventory.available < quantity) {
-      return res.badRequest({
-        error: "Insufficient inventory"
-      });
+    if ((product.status || (product.isAvailable ? "Available" : "Unavailable")) !== "Available") {
+      return res.badRequest({ error: "This item is not currently available for rental" });
     }
 
     let cart = await Cart.findOne({ user: req.user._id });

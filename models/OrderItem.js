@@ -37,7 +37,7 @@ const orderItemSchema = new mongoose.Schema(
 orderItemSchema.pre("save", function (next) {
   this.total = this.price * this.quantity;
   this.discountTotal = (this.discountPrice || 0) * this.quantity;
-  return ext();
+  return next();
 });
 
 export default mongoose.model("OrderItem", orderItemSchema);

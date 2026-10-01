@@ -24,7 +24,7 @@ const chunker = new RecursiveChunker({
 
 const embedding = new LocalEmbedding({
   model: "Xenova/all-MiniLM-L6-v2"
-});
+}); 
 
 const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY
@@ -71,4 +71,6 @@ const answer = await rag.ask(question, {
 
 console.log("Question:", question);
 console.log("Answer:", answer);
+
+
 

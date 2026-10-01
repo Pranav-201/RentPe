@@ -17,9 +17,6 @@ export async function getAllProducts(req, res) {
     if (location) {
       filter.location = { $regex: location, $options: "i" };
     }
-    if (available === "true") {
-      filter.isAvailable = true;
-    }
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -43,6 +40,43 @@ export async function getAllProducts(req, res) {
       sortObj = { "ratings.average": -1, "ratings.count": -1 };
     } else if (sort === "oldest") {
       sortObj = { createdAt: 1 };
+    }
+
+    // College/campus filter — join on owner's collegeName or product.location
+    const { college } = req.query;
+    if (college) {
+      const User = mongoose.model("User");
+      const matchingUsers = await User.find(
+        { collegeName: { $regex: college, $options: "i" } },
+        "_id"
+      );
+      const userIds = matchingUsers.map((u) => u._id);
+      const collegeOr = [
+        { owner: { $in: userIds } },
+        { location: { $regex: college, $options: "i" } }
+      ];
+
+      if (filter.$or) {
+        filter.$and = [
+          { $or: filter.$or },
+          { $or: collegeOr }
+        ];
+        delete filter.$or;
+      } else {
+        filter.$or = collegeOr;
+      }
+    }
+
+    if (available === "true" || req.query.inStock === "true") {
+      filter.$and = [
+        ...(filter.$and || []),
+        {
+          $or: [
+            { status: "Available" },
+            { status: { $exists: false }, isAvailable: true }
+          ]
+        }
+      ];
     }
 
     let query = Product.find(filter)
@@ -145,6 +179,7 @@ export async function createProduct(req, res) {
       tags: tags || [],
       images: images && images.length ? images : [{ url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80", alt: name }],
       isAvailable: true,
+      status: "Available",
       createdBy: req.user._id,
       owner: req.user._id
     });
@@ -209,6 +244,34 @@ export async function updateProduct(req, res) {
   }
 }
 
+export async function updateProductStatus(req, res) {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.notFound({ error: "Rental item not found" });
+    }
+
+    const product = await Product.findOne({ _id: req.params.id, isActive: true });
+    if (!product) {
+      return res.notFound({ error: "Rental item not found" });
+    }
+
+    if (product.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.forbidden({ error: "You can only update your own listings" });
+    }
+
+    product.status = req.body.status;
+    product.isAvailable = req.body.status === "Available";
+    await product.save();
+
+    res.ok({
+      message: "Rental item status updated successfully",
+      product
+    });
+  } catch (error) {
+    res.serverError({ error: error.message });
+  }
+}
+
 export async function deleteProduct(req, res) {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -238,3 +301,54 @@ export async function deleteProduct(req, res) {
     res.serverError({ error: error.message });
   }
 }
+
+export async function getCampuses(req, res) {
+  try {
+    const User = mongoose.model("User");
+
+    // Get all active product owner/createdBy/location (lean for performance)
+    const activeProducts = await Product.find({ isActive: true }, "owner createdBy location").lean();
+
+    // Collect owner IDs
+    const ownerIds = [];
+    activeProducts.forEach((p) => {
+      if (p.owner) ownerIds.push(p.owner.toString());
+      else if (p.createdBy) ownerIds.push(p.createdBy.toString());
+    });
+
+    // Map userId -> collegeName
+    const uniqueOwnerIds = [...new Set(ownerIds)];
+    const users = await User.find(
+      { _id: { $in: uniqueOwnerIds }, collegeName: { $exists: true, $ne: "" } },
+      "_id collegeName"
+    ).lean();
+    const userCollegeMap = {};
+    users.forEach((u) => {
+      userCollegeMap[u._id.toString()] = u.collegeName;
+    });
+
+    // Count products per college
+    const collegeCounts = {};
+    activeProducts.forEach((p) => {
+      const ownerId = p.owner
+        ? p.owner.toString()
+        : p.createdBy
+          ? p.createdBy.toString()
+          : null;
+
+      const productLoc = p.location && p.location !== "On Campus" ? p.location : null;
+      const collegeName = productLoc || (ownerId ? userCollegeMap[ownerId] : null);
+      if (!collegeName) return;
+      collegeCounts[collegeName] = (collegeCounts[collegeName] || 0) + 1;
+    });
+
+    const campuses = Object.entries(collegeCounts)
+      .map(([college, count]) => ({ college, count }))
+      .sort((a, b) => b.count - a.count);
+
+    res.ok({ campuses });
+  } catch (error) {
+    res.serverError({ error: error.message });
+  }
+}
+    

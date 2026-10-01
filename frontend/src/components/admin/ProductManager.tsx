@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, Search, RefreshCw, PackageOpen } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, RefreshCw, PackageOpen, GraduationCap, Building2 } from 'lucide-react';
 import { Product, Category } from '../../types';
-import { productService, ProductPayload } from '../../services/productService';
+import { productService, ProductPayload, ProductStatus } from '../../services/productService';
 import { categoryService } from '../../services/categoryService';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../common/Modal';
 
 export const ProductManager: React.FC = () => {
+  const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +22,11 @@ export const ProductManager: React.FC = () => {
     discountPrice: 0,
     category: '',
     sku: '',
+    location: '',
     tags: [],
     images: [{ url: '', alt: '' }],
   });
+  const [customCollege, setCustomCollege] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +57,7 @@ export const ProductManager: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingProduct(null);
+    const defaultCampus = user?.collegeName || 'IIT Delhi';
     setFormData({
       name: '',
       description: '',
@@ -60,9 +65,11 @@ export const ProductManager: React.FC = () => {
       discountPrice: 0,
       category: categories[0]?._id || '',
       sku: `RENT-${Date.now().toString(36).toUpperCase()}`,
+      location: defaultCampus,
       tags: ['student', 'campus'],
       images: [{ url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80', alt: 'Rental Item' }],
     });
+    setCustomCollege(false);
     setTagInput('student, campus');
     setIsModalOpen(true);
   };
@@ -70,6 +77,8 @@ export const ProductManager: React.FC = () => {
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
     const catId = typeof product.category === 'object' ? product.category._id : product.category;
+    const userCampus = user?.collegeName || 'IIT Delhi';
+    const prodCampus = product.location || userCampus;
     setFormData({
       name: product.name,
       description: product.description,
@@ -77,9 +86,11 @@ export const ProductManager: React.FC = () => {
       discountPrice: product.discountPrice || 0,
       category: catId,
       sku: product.sku,
+      location: prodCampus,
       tags: product.tags || [],
       images: product.images?.length ? product.images : [{ url: '', alt: '' }],
     });
+    setCustomCollege(prodCampus.toLowerCase() !== userCampus.toLowerCase());
     setTagInput((product.tags || []).join(', '));
     setIsModalOpen(true);
   };
@@ -129,6 +140,16 @@ export const ProductManager: React.FC = () => {
       await loadData();
     } catch (err: any) {
       error(err.message || 'Failed to remove listing');
+    }
+  };
+
+  const handleStatusChange = async (product: Product, status: ProductStatus) => {
+    try {
+      const res = await productService.updateStatus(product._id, status);
+      setProducts((prev) => prev.map((item) => item._id === product._id ? res.product : item));
+      success('Listing status updated');
+    } catch (err: any) {
+      error(err.message || 'Failed to update listing status');
     }
   };
 
@@ -183,19 +204,20 @@ export const ProductManager: React.FC = () => {
               <th className="p-3.5">SKU</th>
               <th className="p-3.5">Category</th>
               <th className="p-3.5">Daily Rate</th>
+              <th className="p-3.5">Status</th>
               <th className="p-3.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/60">
             {loading ? (
               <tr>
-                <td colSpan={5} className="p-8 text-center text-zinc-500">
+                <td colSpan={6} className="p-8 text-center text-zinc-500">
                   Loading your rental listings...
                 </td>
               </tr>
             ) : filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-10 text-center">
+                  <td colSpan={6} className="p-10 text-center">
                   <div className="max-w-sm mx-auto space-y-3">
                     <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 mx-auto flex items-center justify-center text-zinc-400">
                       <PackageOpen className="w-6 h-6" />
@@ -229,10 +251,15 @@ export const ProductManager: React.FC = () => {
                 return (
                   <tr key={p._id} className="hover:bg-zinc-800/40 transition-colors">
                     <td className="p-3.5 flex items-center gap-3">
-                      <img src={img} alt="" className="w-10 h-10 rounded-lg object-cover bg-zinc-950 border border-zinc-800" />
+                      <img src={img} alt="" className="w-10 h-10 rounded-lg object-cover bg-zinc-950 border border-zinc-800 flex-shrink-0" />
                       <div>
                         <span className="font-semibold text-zinc-100 block">{p.name}</span>
-                        <span className="text-[10px] text-zinc-400 line-clamp-1">{p.description}</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="inline-flex items-center gap-1 text-[10px] text-zinc-300 font-mono bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded">
+                            <GraduationCap className="w-2.5 h-2.5 text-zinc-400" />
+                            {p.location && p.location !== 'On Campus' ? p.location : (typeof p.owner === 'object' && p.owner?.collegeName) || user?.collegeName || 'Campus'}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="p-3.5 font-mono text-zinc-400">{p.sku}</td>
@@ -244,10 +271,22 @@ export const ProductManager: React.FC = () => {
                     <td className="p-3.5 font-mono font-bold text-zinc-100">
                       ₹{p.price.toFixed(0)}<span className="text-xs text-zinc-400 font-normal">/day</span>
                       {p.discountPrice ? (
-                        <span className="text-[10px] text-emerald-400 block font-normal">
+                        <span className="text-[10px] text-zinc-400 block font-normal">
                           Sale: ₹{p.discountPrice.toFixed(0)}/day
                         </span>
                       ) : null}
+                    </td>
+                    <td className="p-3.5">
+                      <select
+                        value={p.status || (p.isAvailable === false ? 'Unavailable' : 'Available')}
+                        onChange={(e) => handleStatusChange(p, e.target.value as ProductStatus)}
+                        className="rounded-lg bg-zinc-950 border border-zinc-800 px-2 py-1.5 text-[11px] text-zinc-200 focus:outline-none focus:border-zinc-500"
+                        aria-label={`Status for ${p.name}`}
+                      >
+                        <option value="Available">Available</option>
+                        <option value="Already Rented">Already Rented</option>
+                        <option value="Unavailable">Unavailable</option>
+                      </select>
                     </td>
                     <td className="p-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
@@ -345,6 +384,76 @@ export const ProductManager: React.FC = () => {
             </div>
           </div>
 
+          {/* Campus / College Selection */}
+          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-zinc-300 font-medium font-mono text-[11px] flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Campus / College Location *</span>
+              </label>
+              <span className="text-[10px] text-zinc-500 font-mono">Visible in Campus Search</span>
+            </div>
+
+            <div className="flex rounded-lg bg-zinc-900 p-0.5 border border-zinc-800 text-[11px] font-medium">
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomCollege(false);
+                  setFormData((prev) => ({ ...prev, location: user?.collegeName || 'IIT Delhi' }));
+                }}
+                className={`flex-1 py-1.5 px-2 rounded-md transition-all flex items-center justify-center gap-1.5 ${!customCollege
+                    ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                  }`}
+              >
+                <Building2 className="w-3 h-3 text-zinc-400" />
+                <span className="truncate">My Campus ({user?.collegeName || 'IIT Delhi'})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomCollege(true);
+                  if (!formData.location || formData.location === user?.collegeName) {
+                    setFormData((prev) => ({ ...prev, location: '' }));
+                  }
+                }}
+                className={`flex-1 py-1.5 px-2 rounded-md transition-all flex items-center justify-center gap-1.5 ${customCollege
+                    ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                  }`}
+              >
+                <span>+ List in Another College</span>
+              </button>
+            </div>
+
+            {customCollege && (
+              <div className="space-y-1.5 pt-1 animate-in fade-in duration-150">
+                <input
+                  type="text"
+                  required={customCollege}
+                  value={formData.location || ''}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 text-xs focus:outline-none focus:border-zinc-500"
+                  placeholder="Enter college/university name (e.g. DTU, BITS Pilani, IIT Bombay, DU)..."
+                />
+                <div className="flex flex-wrap gap-1">
+                  {['IIT Delhi', 'DTU Delhi', 'NSUT', 'BITS Pilani', 'IIT Bombay', 'Delhi University (DU)'].map(
+                    (col) => (
+                      <button
+                        key={col}
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, location: col }))}
+                        className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors"
+                      >
+                        {col}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-zinc-400 mb-1 font-medium font-mono text-[11px]">Rental Price (₹/day) *</label>
@@ -408,7 +517,7 @@ export const ProductManager: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -416,6 +525,7 @@ export const ProductManager: React.FC = () => {
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={saving}

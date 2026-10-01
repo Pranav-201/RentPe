@@ -55,6 +55,8 @@ export interface Product {
     average: number;
     count: number;
   };
+  status?: 'Available' | 'Already Rented' | 'Unavailable';
+  isAvailable?: boolean;
   isActive: boolean;
   createdBy?: User | string;
   owner?: User | string;
@@ -136,17 +138,28 @@ export interface ShippingAddress {
   country: string;
 }
 
+export interface OrderMessage {
+  _id?: string;
+  sender: string | User;
+  senderName?: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Order {
   _id: string;
+  orderNumber?: string;
   user: string | User;
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   totalPrice: number;
   discountPrice: number;
   finalPrice: number;
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'accepted' | 'declined' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'completed' | 'failed' | 'refunded';
   paymentMethod: string;
+  notes?: string;
+  messages?: OrderMessage[];
   createdAt: string;
   updatedAt: string;
 }

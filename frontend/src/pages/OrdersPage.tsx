@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Package,
-  ShoppingBag
+  ShoppingBag,
+  MessageSquare,
+  CheckCircle2
 } from 'lucide-react';
 import { Order } from '../types';
 import { orderService } from '../services/orderService';
@@ -10,12 +12,15 @@ import { useToast } from '../context/ToastContext';
 import { Badge } from '../components/common/Badge';
 import { EmptyState } from '../components/common/EmptyState';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
+import { OwnerChatModal } from '../components/chat/OwnerChatModal';
 
 export const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [selectedChatOrder, setSelectedChatOrder] = useState<Order | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { success, error } = useToast();
 
@@ -38,17 +43,17 @@ export const OrdersPage: React.FC = () => {
   }, [fetchOrders]);
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!confirm('Are you sure you want to cancel this order? Reserved stock will be returned.')) {
+    if (!confirm('Are you sure you want to cancel this rental request?')) {
       return;
     }
 
     try {
       setCancellingId(orderId);
       await orderService.cancelOrder(orderId);
-      success('Order cancelled successfully');
+      success('Rental request cancelled');
       await fetchOrders();
     } catch (err: any) {
-      error(err.message || 'Failed to cancel order');
+      error(err.message || 'Failed to cancel request');
     } finally {
       setCancellingId(null);
     }
@@ -56,6 +61,10 @@ export const OrdersPage: React.FC = () => {
 
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
+      case 'accepted':
+        return <Badge variant="success">Accepted</Badge>;
+      case 'declined':
+        return <Badge variant="danger">Declined</Badge>;
       case 'delivered':
         return <Badge variant="success">Returned</Badge>;
       case 'shipped':
@@ -63,9 +72,9 @@ export const OrdersPage: React.FC = () => {
       case 'confirmed':
         return <Badge variant="primary">Confirmed</Badge>;
       case 'pending':
-        return <Badge variant="warning">Pending Approval</Badge>;
+        return <Badge variant="warning">Pending Owner Approval</Badge>;
       case 'cancelled':
-        return <Badge variant="danger">Cancelled</Badge>;
+        return <Badge variant="neutral">Cancelled</Badge>;
       default:
         return <Badge variant="neutral">{status}</Badge>;
     }
@@ -80,13 +89,13 @@ export const OrdersPage: React.FC = () => {
             <Package className="w-6 h-6 text-violet-400" /> My Rentals
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Track the status of your active and past rental requests
+            Track the status of your rental requests and chat with item owners
           </p>
         </div>
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          {['', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((st) => (
+          {['', 'pending', 'accepted', 'declined', 'confirmed', 'delivered', 'cancelled'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
@@ -96,7 +105,7 @@ export const OrdersPage: React.FC = () => {
                   : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
               }`}
             >
-              {st || 'All'}
+              {st === '' ? 'All' : st === 'pending' ? 'Pending' : st}
             </button>
           ))}
         </div>
@@ -128,15 +137,15 @@ export const OrdersPage: React.FC = () => {
             return (
               <div
                 key={order._id}
-                className="p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4 hover:border-slate-700/80 transition-all"
+                className="p-5 sm:p-6 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-4 hover:border-zinc-700/80 transition-all"
               >
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="font-mono text-xs font-bold text-indigo-400">
-                      #{order._id.slice(-8).toUpperCase()}
+                    <span className="font-mono text-xs font-bold text-violet-400">
+                      {order.orderNumber || `#${order._id.slice(-6).toUpperCase()}`}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-zinc-400">
                       {new Date(order.createdAt).toLocaleDateString(undefined, {
                         year: 'numeric',
                         month: 'short',
@@ -166,25 +175,25 @@ export const OrdersPage: React.FC = () => {
                     return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs"
+                        className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 text-xs"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={img}
                             alt=""
-                            className="w-10 h-10 rounded-lg object-cover bg-slate-800 flex-shrink-0"
+                            className="w-10 h-10 rounded-lg object-cover bg-zinc-900 border border-zinc-800 flex-shrink-0"
                           />
                           <div>
-                            <span className="font-semibold text-slate-200 block">
+                            <span className="font-semibold text-zinc-200 block">
                               {product?.name || 'Rental item'}
                             </span>
-                            <span className="text-slate-500 text-[11px]">
+                            <span className="text-zinc-400 text-[11px]">
                               {item.quantity} day{item.quantity > 1 ? 's' : ''} × ₹{item.price?.toFixed(0)}
                             </span>
                           </div>
                         </div>
 
-                        <span className="font-mono font-bold text-slate-200">
+                        <span className="font-mono font-bold text-zinc-200">
                           ₹{(item.finalPrice || item.price * item.quantity).toFixed(0)}
                         </span>
                       </div>
@@ -192,24 +201,43 @@ export const OrdersPage: React.FC = () => {
                   })}
                 </div>
 
-                {/* Shipping & Actions Footer */}
-                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+                {/* Status description & Actions Footer */}
+                <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-zinc-400">
                   <div>
-                    <span className="font-medium text-slate-300">Deliver to: </span>
-                    <span>
-                      {order.shippingAddress?.street}, {order.shippingAddress?.city},{' '}
-                      {order.shippingAddress?.country}
-                    </span>
+                    {order.status === 'accepted' ? (
+                      <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Request Accepted! You can chat with the owner.
+                      </span>
+                    ) : order.status === 'declined' ? (
+                      <span className="text-rose-400 font-semibold">
+                        This request was declined by the owner.
+                      </span>
+                    ) : (
+                      <span className="text-amber-400 font-medium">
+                        Waiting for owner to review and accept your request.
+                      </span>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                  <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                    {/* Chat with Owner button */}
+                    <button
+                      onClick={() => {
+                        setSelectedChatOrder(order);
+                        setIsChatOpen(true);
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-violet-600/20 transition-all active:scale-95"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" /> Chat with Owner
+                    </button>
+
                     {canCancel && (
                       <button
                         onClick={() => handleCancelOrder(order._id)}
                         disabled={isCancelling}
-                        className="px-3.5 py-1.5 rounded-xl border border-rose-900/60 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 text-xs font-semibold transition-colors disabled:opacity-50"
+                        className="px-3.5 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-rose-400 hover:border-rose-900/50 text-xs font-semibold transition-colors disabled:opacity-50"
                       >
-                        {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                        {isCancelling ? 'Cancelling...' : 'Cancel Request'}
                       </button>
                     )}
                   </div>
@@ -219,6 +247,21 @@ export const OrdersPage: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* Chat Modal */}
+      <OwnerChatModal
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        order={selectedChatOrder}
+        onStatusChange={(updatedOrder) => {
+          setOrders((prev) =>
+            prev.map((o) => (o._id === updatedOrder._id ? updatedOrder : o))
+          );
+          if (selectedChatOrder && selectedChatOrder._id === updatedOrder._id) {
+            setSelectedChatOrder(updatedOrder);
+          }
+        }}
+      />
     </div>
   );
 };

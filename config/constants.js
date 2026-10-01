@@ -5,6 +5,8 @@ export const USER_ROLES = {
 
 export const ORDER_STATUS = {
   PENDING: "pending",
+  ACCEPTED: "accepted",
+  DECLINED: "declined",
   CONFIRMED: "confirmed",
   SHIPPED: "shipped",
   DELIVERED: "delivered",

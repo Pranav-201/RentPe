@@ -6,11 +6,15 @@ import {
   getMyListings,
   createProduct,
   updateProduct,
-  deleteProduct
+  updateProductStatus,
+  deleteProduct,
+  getCampuses
 } from "../controllers/productController.js";
 
 export function setupProductRoutes(app) {
   app.get("/api/products", getAllProducts);
+
+  app.get("/api/products/campuses", getCampuses);
 
   app.get("/api/products/user/my-listings", authenticate, getMyListings);
 
@@ -28,6 +32,13 @@ export function setupProductRoutes(app) {
     authenticate,
     validate(validationSchemas.product),
     updateProduct
+  );
+
+  app.patch(
+    "/api/products/:id/status",
+    authenticate,
+    validate(validationSchemas.productStatus),
+    updateProductStatus
   );
 
   app.delete(

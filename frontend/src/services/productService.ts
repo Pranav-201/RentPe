@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { Product, Inventory, Pagination } from '../types';
+import { Product, Pagination } from '../types';
 
 export interface ProductFilters {
   page?: number;
@@ -10,6 +10,7 @@ export interface ProductFilters {
   maxPrice?: number | string;
   inStock?: boolean | string;
   sort?: string;
+  college?: string;
 }
 
 export interface ProductListResponse {
@@ -19,7 +20,7 @@ export interface ProductListResponse {
 
 export interface ProductDetailResponse {
   product: Product;
-  inventory?: Inventory;
+  inventory?: import('../types').Inventory;
 }
 
 export interface ProductPayload {
@@ -29,8 +30,16 @@ export interface ProductPayload {
   discountPrice?: number;
   category: string;
   sku: string;
+  location?: string;
   tags?: string[];
   images?: Array<{ url: string; alt?: string }>;
+}
+
+export type ProductStatus = 'Available' | 'Already Rented' | 'Unavailable';
+
+export interface CampusEntry {
+  college: string;
+  count: number;
 }
 
 export const productService = {
@@ -57,6 +66,11 @@ export const productService = {
     return res.data;
   },
 
+  async getCampuses(): Promise<{ campuses: CampusEntry[] }> {
+    const res = await apiClient.get<{ campuses: CampusEntry[] }>('/products/campuses');
+    return res.data;
+  },
+
   async create(data: ProductPayload): Promise<{ message: string; product: Product }> {
     const res = await apiClient.post<{ message: string; product: Product }>('/products', data);
     return res.data;
@@ -67,8 +81,14 @@ export const productService = {
     return res.data;
   },
 
+  async updateStatus(id: string, status: ProductStatus): Promise<{ message: string; product: Product }> {
+    const res = await apiClient.patch<{ message: string; product: Product }>(`/products/${id}/status`, { status });
+    return res.data;
+  },
+
   async delete(id: string): Promise<{ message: string }> {
     const res = await apiClient.delete<{ message: string }>(`/products/${id}`);
     return res.data;
   },
 };
+

@@ -1,165 +1,361 @@
 import React, { useState } from 'react';
-import { User as UserIcon, MapPin, Save } from 'lucide-react';
+import {
+  Settings,
+  CheckCircle2,
+  Loader2,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
-  const { success, error } = useToast();
+  const { success } = useToast();
 
-  const [name, setName] = useState(user?.name || '');
+  // Split name into first and last
+  const [firstName, setFirstName] = useState(() => {
+    const parts = (user?.name || '').trim().split(' ');
+    return parts[0] || '';
+  });
+  const [lastName, setLastName] = useState(() => {
+    const parts = (user?.name || '').trim().split(' ');
+    return parts.slice(1).join(' ') || '';
+  });
+
   const [phone, setPhone] = useState(user?.phone || '');
+  const [collegeName, setCollegeName] = useState(user?.collegeName || '');
+  const [collegeId, setCollegeId] = useState(user?.collegeId || '');
   const [address, setAddress] = useState({
     street: user?.address?.street || '',
     city: user?.address?.city || '',
     state: user?.address?.state || '',
     zipCode: user?.address?.zipCode || '',
-    country: user?.address?.country || '',
+    country: user?.address?.country || 'India',
   });
 
+  const [activeTab, setActiveTab] = useState<'account' | 'address'>('account');
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Synchronize form values whenever user state updates
+  React.useEffect(() => {
+    if (user) {
+      const parts = (user.name || '').trim().split(' ');
+      setFirstName(parts[0] || '');
+      setLastName(parts.slice(1).join(' ') || '');
+      setPhone(user.phone || '');
+      setCollegeName(user.collegeName || '');
+      setCollegeId(user.collegeId || '');
+      setAddress({
+        street: user.address?.street || '',
+        city: user.address?.city || '',
+        state: user.address?.state || '',
+        zipCode: user.address?.zipCode || '',
+        country: user.address?.country || 'India',
+      });
+    }
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSaving(true);
+      const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ');
       await updateProfile({
-        name,
+        name: fullName,
         phone,
+        collegeName,
+        collegeId,
         address,
       });
-      success('Profile details saved successfully');
-    } catch (err: any) {
-      error(err.message || 'Failed to update profile');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {
+      // Toast error is already handled in AuthContext
     } finally {
       setSaving(false);
     }
   };
 
+  const initials = (firstName || user?.name || 'U')
+    .slice(0, 1)
+    .toUpperCase() + (lastName ? lastName.slice(0, 1).toUpperCase() : '');
+
   return (
-    <div className="page-container max-w-2xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-          <UserIcon className="w-6 h-6 text-indigo-400" /> User Profile & Settings
-        </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Manage your contact credentials and default delivery address
-        </p>
-      </div>
-
-      {/* Profile Overview Card */}
-      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xl font-black">
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-100 text-base">{user?.name}</h3>
-            <p className="text-xs text-slate-400 font-mono">{user?.email}</p>
-          </div>
+    <div className="page-container py-8">
+      <div className="max-w-2xl mx-auto">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-6">
+          <Settings className="w-4 h-4 text-zinc-400" />
+          <span>Settings</span>
+          <span className="text-zinc-600">/</span>
+          <span className="text-zinc-200">
+            {activeTab === 'account' ? 'My Account' : 'Address & Campus'}
+          </span>
         </div>
 
-        <span className="px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-800/60 text-xs font-semibold text-indigo-300 uppercase tracking-wider">
-          {user?.role}
-        </span>
-      </div>
-
-      {/* Edit Form */}
-      <form onSubmit={handleSubmit} className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-5 text-xs">
-        <h3 className="text-sm font-bold text-slate-200">Personal Information</h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-slate-400 mb-1 font-medium">Full Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-slate-400 mb-1 font-medium">Phone Number</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-              placeholder="+1 555-0100"
-            />
-          </div>
-        </div>
-
-        <div className="pt-3 border-t border-slate-800/80 space-y-4">
-          <h3 className="text-sm font-bold text-slate-200 flex items-center gap-1.5">
-            <MapPin className="w-4 h-4 text-indigo-400" /> Default Shipping Address
-          </h3>
-
-          <div>
-            <label className="block text-slate-400 mb-1 font-medium">Street Address</label>
-            <input
-              type="text"
-              value={address.street}
-              onChange={(e) => setAddress({ ...address, street: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-              placeholder="123 Developer Lane"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">City</label>
-              <input
-                type="text"
-                value={address.city}
-                onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">State / Province</label>
-              <input
-                type="text"
-                value={address.state}
-                onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Postal / Zip Code</label>
-              <input
-                type="text"
-                value={address.zipCode}
-                onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-400 mb-1 font-medium">Country</label>
-              <input
-                type="text"
-                value={address.country}
-                onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-3 border-t border-slate-800/80 flex justify-end">
+        {/* Tab Navigation Pill Bar */}
+        <div className="inline-flex items-center gap-1 p-1 bg-zinc-900/90 border border-zinc-800 rounded-xl mb-8">
           <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 disabled:opacity-50 transition-all"
+            type="button"
+            onClick={() => setActiveTab('account')}
+            className={`px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all ${
+              activeTab === 'account'
+                ? 'bg-zinc-800 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
           >
-            <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Profile Changes'}
+            My Account
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('address')}
+            className={`px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all ${
+              activeTab === 'address'
+                ? 'bg-zinc-800 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Address & Campus
           </button>
         </div>
-      </form>
+
+        {/* Section Header */}
+        <div className="mb-6">
+          <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+            {activeTab === 'account' ? 'My Account' : 'Address & Campus Details'}
+          </h1>
+          <p className="text-xs md:text-sm text-zinc-400 mt-1">
+            {activeTab === 'account'
+              ? 'Manage your account information, such as your name, email address and contact details.'
+              : 'Manage your campus location and delivery address preferences for equipment rental.'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {activeTab === 'account' && (
+            <>
+              {/* Avatar Row */}
+              <div className="flex items-center gap-4 pb-2">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 border border-zinc-700 flex items-center justify-center text-white font-bold text-lg select-none shadow-inner">
+                    {initials || 'U'}
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-zinc-950" />
+                </div>
+
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => success('Avatar upload will be available in next update')}
+                    className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors"
+                  >
+                    Change Avatar
+                  </button>
+                  <p className="text-[11px] text-zinc-500 mt-1.5">
+                    At least 800x800 px recommended. JPG or PNG is allowed
+                  </p>
+                </div>
+              </div>
+
+              {/* Names 2-Col Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  Email
+                </label>
+                <div className="relative flex items-center">
+                  <input
+                    type="email"
+                    disabled
+                    value={user?.email || ''}
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80 text-zinc-400 text-xs md:text-sm cursor-not-allowed font-mono"
+                  />
+                  <span className="absolute right-3 text-[10px] text-zinc-500 font-mono">
+                    read-only
+                  </span>
+                </div>
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  Phone Number
+                </label>
+                <div className="flex items-center rounded-lg bg-zinc-900/90 border border-zinc-800 focus-within:border-zinc-500 transition-colors px-3 py-1">
+                  <span className="text-sm mr-2 select-none" role="img" aria-label="India flag">
+                    🇮🇳
+                  </span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91-83283-92296"
+                    className="w-full py-1.5 bg-transparent text-zinc-100 text-xs md:text-sm focus:outline-none placeholder:text-zinc-600"
+                  />
+                </div>
+              </div>
+
+              {/* College / Organization */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  College / Campus or Company
+                </label>
+                <input
+                  type="text"
+                  value={collegeName}
+                  onChange={(e) => setCollegeName(e.target.value)}
+                  placeholder="e.g. IIT Bombay / Product Designer At Accenture"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                />
+              </div>
+
+              {/* Student ID / Roll No */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  Student ID / Roll No (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={collegeId}
+                  onChange={(e) => setCollegeId(e.target.value)}
+                  placeholder="e.g. 21BCE1042"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                />
+              </div>
+            </>
+          )}
+
+          {activeTab === 'address' && (
+            <>
+              {/* Street */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-2">
+                  Street / Hostel / Room No
+                </label>
+                <input
+                  type="text"
+                  value={address.street}
+                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                  placeholder="e.g. Room 204, Hostel Block A"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                />
+              </div>
+
+              {/* City & State */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={address.city}
+                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    placeholder="City"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                    State
+                  </label>
+                  <input
+                    type="text"
+                    value={address.state}
+                    onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                    placeholder="State"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+              </div>
+
+              {/* Zip Code & Country */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                    Zip Code
+                  </label>
+                  <input
+                    type="text"
+                    value={address.zipCode}
+                    onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
+                    placeholder="e.g. 400076"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-2">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    value={address.country}
+                    onChange={(e) => setAddress({ ...address, country: e.target.value })}
+                    placeholder="India"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-100 text-xs md:text-sm focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Action Save Button */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className={`px-5 py-2.5 rounded-lg font-semibold text-xs md:text-sm flex items-center justify-center gap-2 transition-all ${
+                saved
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-white text-zinc-950 hover:bg-zinc-200 active:scale-95 shadow-sm'
+              } disabled:opacity-60`}
+            >
+              {saved ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" /> Saved
+                </>
+              ) : saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                'Save'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -68,6 +68,10 @@ export const validationSchemas = {
       .optional()
   }),
 
+  productStatus: Joi.object({
+    status: Joi.string().valid("Available", "Already Rented", "Unavailable").required()
+  }),
+
   category: Joi.object({
     name: Joi.string().min(1).max(100).required(),
     description: Joi.string().max(1000).optional(),
@@ -96,13 +100,18 @@ export const validationSchemas = {
 
   order: Joi.object({
     shippingAddress: Joi.object({
-      street: Joi.string().required(),
-      city: Joi.string().required(),
-      state: Joi.string().required(),
-      zipCode: Joi.string().required(),
-      country: Joi.string().required()
-    }).required(),
-    paymentMethod: Joi.string().required()
+      street: Joi.string().optional().allow(""),
+      city: Joi.string().optional().allow(""),
+      state: Joi.string().optional().allow(""),
+      zipCode: Joi.string().optional().allow(""),
+      country: Joi.string().optional().allow("")
+    }).optional(),
+    paymentMethod: Joi.string().optional().allow(""),
+    cartItemId: Joi.string().optional().allow(""),
+    productId: Joi.string().optional().allow(""),
+    quantity: Joi.number().optional(),
+    days: Joi.number().optional(),
+    message: Joi.string().optional().allow("")
   }),
 
   review: Joi.object({

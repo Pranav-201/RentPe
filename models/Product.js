@@ -56,7 +56,7 @@ const productSchema = new mongoose.Schema(
     sku: {
       type: String,
       uppercase: true,
-      default: function() {
+      default: function () {
         return `RENT-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
       }
     },
@@ -76,6 +76,11 @@ const productSchema = new mongoose.Schema(
     isAvailable: {
       type: Boolean,
       default: true
+    },
+    status: {
+      type: String,
+      enum: ["Available", "Already Rented", "Unavailable"],
+      default: "Available"
     },
     isActive: {
       type: Boolean,
@@ -104,7 +109,7 @@ productSchema.virtual("reviews", {
   foreignField: "product"
 });
 
-productSchema.pre("save", function(next) {
+productSchema.pre("save", function (next) {
   if (this.price && !this.pricePerDay) {
     this.pricePerDay = this.price;
   }
@@ -113,6 +118,9 @@ productSchema.pre("save", function(next) {
   }
   if (this.createdBy && !this.owner) {
     this.owner = this.createdBy;
+  }
+  if (this.isModified("status")) {
+    this.isAvailable = this.status === "Available";
   }
   return next();
 });

@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema(
     orderNumber: {
       type: String,
       unique: true,
-      required: true
+      default: () => `ORD-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -57,7 +57,21 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "completed", "failed"],
       default: "pending"
     },
-    notes: String
+    notes: String,
+    messages: [
+      {
+        sender: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User"
+        },
+        senderName: String,
+        text: String,
+        createdAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ]
   },
   { timestamps: true }
 );

@@ -33,6 +33,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const hasDiscount = !!product.discountPrice && product.discountPrice < product.price;
   const currentPrice = hasDiscount ? product.discountPrice! : product.price;
+  const status = product.status || (product.isAvailable === false ? 'Unavailable' : 'Available');
+  const isRentable = status === 'Available';
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -69,6 +71,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 z-10">
           <span className="px-2 py-0.5 rounded-md bg-zinc-950/80 backdrop-blur-md border border-zinc-800 text-[10px] font-mono text-zinc-300">
             {categoryName}
+          </span>
+          <span className={`px-2 py-0.5 rounded-md backdrop-blur-md border text-[10px] font-semibold ${
+            isRentable
+              ? 'bg-emerald-950/80 border-emerald-800 text-emerald-300'
+              : 'bg-rose-950/80 border-rose-800 text-rose-300'
+          }`}>
+            {status}
           </span>
           {hasDiscount && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-white text-zinc-950 shadow-sm">
@@ -122,15 +131,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <button
             onClick={handleAddToCart}
-            disabled={isAdding}
+            disabled={isAdding || !isRentable}
             className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-semibold transition-all duration-200 ${
-              isItemAdded
-                ? 'bg-zinc-800 text-emerald-400 border border-emerald-500/30 shadow-sm hover:bg-zinc-700/80'
+              !isRentable
+                ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                : isItemAdded
+                ? 'bg-zinc-800 text-white border border-zinc-600 shadow-sm hover:bg-zinc-700/80'
                 : 'bg-zinc-100 hover:bg-white text-zinc-950 shadow-sm active:scale-95'
             }`}
-            title={isItemAdded ? 'Item added to cart (Click to view)' : 'Rent this item'}
+            title={!isRentable ? `${status} - not currently rentable` : isItemAdded ? 'Item added to cart (Click to view)' : 'Rent this item'}
           >
-            {isItemAdded ? (
+            {!isRentable ? (
+              <span>{status}</span>
+            ) : isItemAdded ? (
               <>
                 <Check className="w-3.5 h-3.5" />
                 <span>Added</span>

@@ -2,9 +2,13 @@ import { apiClient } from './api';
 import { Order, Pagination, ShippingAddress } from '../types';
 
 export interface CreateOrderPayload {
-  shippingAddress: ShippingAddress;
-  paymentMethod: string;
+  shippingAddress?: Partial<ShippingAddress>;
+  paymentMethod?: string;
   cartItemId?: string;
+  productId?: string;
+  quantity?: number;
+  days?: number;
+  message?: string;
 }
 
 export interface OrderListResponse {
@@ -18,7 +22,12 @@ export const orderService = {
     return res.data;
   },
 
-  async getOrders(params?: { page?: number; limit?: number; status?: string }): Promise<OrderListResponse> {
+  async getOrders(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    type?: string;
+  }): Promise<OrderListResponse> {
     const res = await apiClient.get<OrderListResponse>('/orders', { params });
     return res.data;
   },
@@ -33,6 +42,14 @@ export const orderService = {
     data: { status?: string; paymentStatus?: string }
   ): Promise<{ message: string; order: Order }> {
     const res = await apiClient.patch<{ message: string; order: Order }>(`/orders/${id}/status`, data);
+    return res.data;
+  },
+
+  async addMessage(
+    id: string,
+    text: string
+  ): Promise<{ message: string; order: Order }> {
+    const res = await apiClient.post<{ message: string; order: Order }>(`/orders/${id}/messages`, { text });
     return res.data;
   },
 
