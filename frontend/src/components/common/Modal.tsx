@@ -8,6 +8,7 @@ interface ModalProps {
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   tone?: 'default' | 'graphite';
+  showHeader?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -17,6 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = 'md',
   tone = 'default',
+  showHeader = true,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -56,15 +58,17 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className={`relative w-full ${maxWidths[maxWidth]} ${tone === 'graphite' ? 'bg-[#111214] border-[#303238]' : 'bg-slate-900 border-slate-800'} border rounded-2xl shadow-2xl p-6 z-10 max-h-[90vh] overflow-y-auto`}
       >
-        <div className={`flex items-center justify-between pb-4 mb-4 ${tone === 'graphite' ? 'border-[#303238]' : 'border-slate-800'} border-b`}>
-          <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        {showHeader && (
+          <div className={`flex items-center justify-between pb-4 mb-4 ${tone === 'graphite' ? 'border-[#303238]' : 'border-slate-800'} border-b`}>
+            <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
         <div>{children}</div>
       </div>
     </div>

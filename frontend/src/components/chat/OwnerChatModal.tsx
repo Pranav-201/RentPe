@@ -63,7 +63,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
   totalPrice: directTotal = 0,
   onStatusChange,
 }) => {
-  const { user: currentUser, token } = useAuth();
+  const { user: currentUser, token, firebaseToken } = useAuth();
   const { success, error } = useToast();
 
   const [activeOrder, setActiveOrder] = useState<Order | null>(propOrder || null);
@@ -167,9 +167,10 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    if (!isOpen || !activeOrder?._id || !token) return;
+    const activeToken = firebaseToken || token;
+    if (!isOpen || !activeOrder?._id || !activeToken) return;
 
-    const socket = getChatSocket(token);
+    const socket = getChatSocket(activeToken);
     const handleNewMessage = (message: OrderMessage & { order?: string }) => {
       if (message.order && String(message.order) !== String(activeOrder._id)) return;
 
@@ -204,7 +205,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
       socket.off('newMessage', handleNewMessage);
       socket.off('connect', joinRoom);
     };
-  }, [isOpen, activeOrder?._id, token, currentUser?._id, otherName]);
+  }, [isOpen, activeOrder?._id, firebaseToken, token, currentUser?._id, otherName]);
 
   if (!isOpen) return null;
 
@@ -218,7 +219,8 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
     if (activeOrder?._id) {
       try {
         setSending(true);
-        const socket = token ? getChatSocket(token) : null;
+        const activeToken = firebaseToken || token;
+        const socket = activeToken ? getChatSocket(activeToken) : null;
 
         if (socket?.connected) {
           await new Promise<void>((resolve, reject) => {

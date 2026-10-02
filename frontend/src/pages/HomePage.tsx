@@ -13,6 +13,7 @@ import { ProductFilters } from '../components/products/ProductFilters';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { EmptyState } from '../components/common/EmptyState';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { XeroHero } from '../components/XeroHero';
 
 export const HomePage: React.FC = () => {
@@ -29,6 +30,7 @@ export const HomePage: React.FC = () => {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const { error } = useToast();
+  const { isAuthenticated } = useAuth();
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -93,6 +95,12 @@ export const HomePage: React.FC = () => {
           </div>
           <Link
             to="/admin"
+            onClick={(event) => {
+              if (!isAuthenticated) {
+                event.preventDefault();
+                error('Sign in required to list an item');
+              }
+            }}
             className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-xl px-4 py-2 transition-colors"
           >
             <PlusCircle className="w-3.5 h-3.5" /> List an item

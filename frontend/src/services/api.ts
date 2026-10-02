@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { firebaseAuth } from '../config/firebase';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -11,10 +12,24 @@ export const apiClient = axios.create({
 
 // Request interceptor to attach JWT token
 apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('zingoo_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    if (config.headers.Authorization) {
+      return config;
+    }
+
+    try {
+      const firebaseUser = firebaseAuth.currentUser;
+      if (firebaseUser) {
+        config.headers.Authorization = `Bearer ${await firebaseUser.getIdToken()}`;
+        return config;
+      }
+    } catch {
+      // Fall back to a legacy session if Firebase token refresh is unavailable.
+    }
+
+    const legacyToken = localStorage.getItem('zingoo_token');
+    if (legacyToken) {
+      config.headers.Authorization = `Bearer ${legacyToken}`;
     }
     return config;
   },

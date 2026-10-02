@@ -9,6 +9,7 @@ export const RootLayout: React.FC = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/auth';
   const isAdminPage = location.pathname === '/admin';
+  const isTermsPage = location.pathname === '/terms';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#070709] text-zinc-100 selection:bg-zinc-700 selection:text-white relative">
@@ -23,7 +24,7 @@ export const RootLayout: React.FC = () => {
         <main className={`flex-1 w-full ${isAuthPage ? 'flex flex-col justify-center items-center' : ''}`}>
           <Outlet />
         </main>
-        {!isAuthPage && !isAdminPage && <Footer />}
+        {!isAuthPage && !isAdminPage && !isTermsPage && <Footer />}
         <CartDrawer />
         {!isAuthPage && <FloatingAIChatWidget />}
       </div>

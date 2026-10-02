@@ -1,17 +1,33 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  GoogleAuthProvider,
+  onIdTokenChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  type User as FirebaseUser,
+} from 'firebase/auth';
 import { User } from '../types';
 import { authService, LoginPayload, RegisterPayload } from '../services/authService';
 import { useToast } from './ToastContext';
+import { firebaseAuth } from '../config/firebase';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  firebaseUser: FirebaseUser | null;
+  firebaseToken: string | null;
   loading: boolean;
+  firebaseLoading: boolean;
   isAdmin: boolean;
   isAuthenticated: boolean;
+  isFirebaseAuthenticated: boolean;
   login: (credentials: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
-  logout: () => void;
+  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  getFirebaseIdToken: (forceRefresh?: boolean) => Promise<string | null>;
+  logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   switchDemoUser: (role: 'admin' | 'customer') => Promise<void>;
 }
@@ -22,6 +38,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('zingoo_token'));
   const [loading, setLoading] = useState<boolean>(true);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [firebaseToken, setFirebaseToken] = useState<string | null>(null);
+  const [firebaseLoading, setFirebaseLoading] = useState<boolean>(true);
   const { success, error } = useToast();
 
   const loadCurrentUser = useCallback(async () => {
@@ -50,6 +69,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadCurrentUser();
   }, [loadCurrentUser]);
 
+  useEffect(() => {
+    const unsubscribe = onIdTokenChanged(firebaseAuth, async (currentFirebaseUser) => {
+      setFirebaseUser(currentFirebaseUser);
+
+      if (!currentFirebaseUser) {
+        setFirebaseToken(null);
+        setFirebaseLoading(false);
+        return;
+      }
+
+      let idToken: string;
+      try {
+        idToken = await currentFirebaseUser.getIdToken();
+        setFirebaseToken(idToken);
+      } catch (err) {
+        console.warn('Failed to retrieve Firebase ID token:', err);
+        setFirebaseToken(null);
+        setFirebaseLoading(false);
+        return;
+      }
+
+      try {
+        const syncedAccount = await authService.syncFirebaseAccount(idToken);
+        setUser(syncedAccount.user);
+      } catch (err) {
+        console.warn('Failed to synchronize Firebase account:', err);
+      } finally {
+        setFirebaseLoading(false);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const getFirebaseErrorMessage = (err: any) => {
+    switch (err?.code) {
+      case 'auth/invalid-email':
+        return 'Enter a valid email address.';
+      case 'auth/invalid-credential':
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+        return 'Incorrect email or password.';
+      case 'auth/popup-closed-by-user':
+        return 'Google sign-in was cancelled.';
+      case 'auth/popup-blocked':
+        return 'Your browser blocked the sign-in popup. Please allow popups and try again.';
+      case 'auth/account-exists-with-different-credential':
+        return 'An account already exists with a different sign-in method.';
+      case 'auth/network-request-failed':
+        return 'Network error. Check your connection and try again.';
+      default:
+        return 'Unable to sign in. Please try again.';
+    }
+  };
+
   const login = async (credentials: LoginPayload) => {
     try {
       const data = await authService.login(credentials);
@@ -76,11 +150,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const signInWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(firebaseAuth, provider);
+    } catch (err: any) {
+      const message = getFirebaseErrorMessage(err);
+      error(message);
+      throw new Error(message);
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(firebaseAuth, email, password);
+    } catch (err: any) {
+      const message = getFirebaseErrorMessage(err);
+      error(message);
+      throw new Error(message);
+    }
+  };
+
+  const getFirebaseIdToken = async (forceRefresh = false) => {
+    const currentFirebaseUser = firebaseAuth.currentUser;
+    if (!currentFirebaseUser) return null;
+
+    const idToken = await currentFirebaseUser.getIdToken(forceRefresh);
+    setFirebaseToken(idToken);
+    return idToken;
+  };
+
+  const logout = async () => {
     localStorage.removeItem('zingoo_token');
     setToken(null);
     setUser(null);
-    success('Logged out successfully');
+
+    try {
+      await signOut(firebaseAuth);
+      success('Logged out successfully');
+    } catch (err) {
+      error('Failed to sign out of Firebase. Please try again.');
+    }
   };
 
   const updateProfile = async (data: Partial<User>) => {
@@ -138,17 +248,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = user?.role === 'admin';
   const isAuthenticated = !!user;
+  const isFirebaseAuthenticated = !!firebaseUser;
 
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
+        firebaseUser,
+        firebaseToken,
         loading,
+        firebaseLoading,
         isAdmin,
         isAuthenticated,
+        isFirebaseAuthenticated,
         login,
         register,
+        signInWithGoogle,
+        signInWithEmail,
+        getFirebaseIdToken,
         logout,
         updateProfile,
         switchDemoUser,

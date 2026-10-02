@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, CheckCircle2, ScrollText, Shield, AlertTriangle,
-  FileText, Clock, Ban, HelpCircle, ChevronDown
+  FileText, Clock, Ban, HelpCircle
 } from 'lucide-react';
 
 const TERMS_ACCEPTED_KEY = 'rentpe_terms_accepted';
@@ -10,23 +10,8 @@ const TERMS_ACCEPTED_KEY = 'rentpe_terms_accepted';
 export const TermsPage: React.FC = () => {
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
-  const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [shake, setShake] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Track if user scrolled to bottom of terms content
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const handler = () => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      if (scrollTop + clientHeight >= scrollHeight - 40) {
-        setScrolledToBottom(true);
-      }
-    };
-    el.addEventListener('scroll', handler);
-    return () => el.removeEventListener('scroll', handler);
-  }, []);
 
   const handleAgree = () => {
     if (!checked) {
@@ -35,7 +20,7 @@ export const TermsPage: React.FC = () => {
       return;
     }
     sessionStorage.setItem(TERMS_ACCEPTED_KEY, 'true');
-    navigate('/cart');
+    navigate('/');
   };
 
   const sections = [
@@ -144,11 +129,11 @@ export const TermsPage: React.FC = () => {
         style={{ background: 'rgba(7,7,10,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
       >
         <button
-          onClick={() => navigate('/cart')}
+          onClick={() => navigate('/')}
           className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors text-xs font-medium group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Back to Checkout
+          Back to Sign in
         </button>
 
         <div className="h-4 w-px bg-slate-800" />
@@ -225,13 +210,6 @@ export const TermsPage: React.FC = () => {
           );
         })}
 
-        {/* Scroll hint */}
-        {!scrolledToBottom && (
-          <div className="flex flex-col items-center gap-1.5 py-2 text-slate-600 animate-bounce">
-            <ChevronDown className="w-4 h-4" />
-            <span className="text-[11px]">Scroll to read all terms</span>
-          </div>
-        )}
       </div>
 
       {/* ── Sticky Agreement Footer ── */}
@@ -276,7 +254,7 @@ export const TermsPage: React.FC = () => {
             }
           >
             <CheckCircle2 className="w-4 h-4" />
-            {checked ? 'I Agree — Continue to Checkout' : 'Please accept the terms to continue'}
+            {checked ? 'I Agree — Continue to Sign in' : 'Please accept the terms to continue'}
           </button>
 
           <p className="text-center text-[11px] text-slate-600">

@@ -14,6 +14,7 @@ export interface User {
   };
   role: 'admin' | 'customer';
   isActive: boolean;
+  profileComplete?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 import User from "../models/User.js";
+import { getFirebaseAuthenticatedUser } from "../middleware/firebaseAuth.js";
 import {
   conversationRoom,
   createMessage,
@@ -21,6 +22,18 @@ function getToken(socket) {
     : null;
 }
 
+async function getSocketUser(token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user || !user.isActive) throw new Error("User not found or inactive");
+    return user;
+  } catch {
+    const authenticated = await getFirebaseAuthenticatedUser(token);
+    return authenticated.user;
+  }
+}
+
 export function initializeSocket(server) {
   io = new Server(server, {
     cors: {
@@ -36,14 +49,10 @@ export function initializeSocket(server) {
       const token = getToken(socket);
       if (!token) throw new Error("Authentication required");
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id);
-      if (!user || !user.isActive) throw new Error("User not found or inactive");
-
-      socket.user = user;
+      socket.user = await getSocketUser(token);
       next();
     } catch (error) {
-      next(new Error(error.message || "Invalid socket authentication"));
+      next(new Error("Invalid socket authentication"));
     }
   });
 

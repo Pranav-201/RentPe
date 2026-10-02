@@ -28,6 +28,10 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface FirebaseSyncResponse {
+  user: User;
+}
+
 export const authService = {
   async register(data: RegisterPayload): Promise<AuthResponse> {
     const res = await apiClient.post<AuthResponse>('/auth/register', data);
@@ -36,6 +40,15 @@ export const authService = {
 
   async login(data: LoginPayload): Promise<AuthResponse> {
     const res = await apiClient.post<AuthResponse>('/auth/login', data);
+    return res.data;
+  },
+
+  async syncFirebaseAccount(firebaseToken: string): Promise<FirebaseSyncResponse> {
+    const res = await apiClient.post<FirebaseSyncResponse>(
+      '/auth/firebase/sync',
+      undefined,
+      { headers: { Authorization: `Bearer ${firebaseToken}` } }
+    );
     return res.data;
   },
 

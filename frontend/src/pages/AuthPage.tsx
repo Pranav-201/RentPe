@@ -1,53 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, Mail, User as UserIcon, ArrowRight, Phone, GraduationCap, Building2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const AuthPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const [isRegister, setIsRegister] = useState(searchParams.get('mode') === 'register');
-  const [name, setName] = useState('');
+  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const [isEmailLoginOpen, setIsEmailLoginOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [collegeId, setCollegeId] = useState('');
-  const [collegeName, setCollegeName] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const { login, register } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (searchParams.get('mode') === 'register') {
-      setIsRegister(true);
-    }
-  }, [searchParams]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleLogin = async () => {
     try {
-      setLoading(true);
-      if (isRegister) {
-        await register({
-          name,
-          email,
-          password,
-          phone,
-          collegeId,
-          collegeName,
-        });
-      } else {
-        await login({ email, password });
-      }
-      navigate('/');
+      await signInWithGoogle();
     } catch {
-      // Error handled by AuthContext toast
-    } finally {
-      setLoading(false);
+      // Firebase errors are shown through the existing toast UI.
     }
   };
 
-  const inputClass = "w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#18191b] border border-[#303238] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/30 transition-all text-sm";
+  const handleEmailLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    try {
+      await signInWithEmail(email, password);
+    } catch {
+      // Firebase errors are shown through the existing toast UI.
+    }
+  };
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-[#070709] px-3 py-2 sm:px-6 sm:py-4 lg:px-10">
@@ -66,56 +42,51 @@ export const AuthPage: React.FC = () => {
         <div className="flex items-center bg-[#111214] px-5 py-5 sm:px-8 lg:px-12">
           <div className="w-full max-w-xl mx-auto space-y-3">
             <div className="space-y-1.5">
-              <h1 className={`${isRegister ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'} font-semibold tracking-tight text-white`}>
-                {isRegister ? 'Create your account' : 'Welcome back'}
-              </h1>
-              <p className="text-sm text-zinc-400">
-                {isRegister ? 'Join your campus rental community.' : 'Sign in to access your rentals and listings.'}
-              </p>
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Welcome to RentPe</h1>
             </div>
 
-            <div className="flex border-b border-white/10 text-sm font-semibold">
-              <button type="button" onClick={() => setIsRegister(false)} className={`flex-1 border-b-2 py-3 transition-colors ${!isRegister ? 'border-white text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}>Sign In</button>
-              <button type="button" onClick={() => setIsRegister(true)} className={`flex-1 border-b-2 py-3 transition-colors ${isRegister ? 'border-white text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}>Register</button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-2 text-xs">
-              {isRegister && (
-                <>
-                  <div>
-                    <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Full Name</label>
-                    <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="text" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Your full name" /></div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                      <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Phone Number</label>
-                      <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+91 98765 43210" /></div>
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Student / College ID</label>
-                      <div className="relative"><GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="text" required minLength={2} value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className={inputClass} placeholder="e.g. 21CS1234" /></div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[11px] font-semibold text-zinc-300">College / University Name</label>
-                    <div className="relative"><Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="text" required minLength={2} value={collegeName} onChange={(e) => setCollegeName(e.target.value)} className={inputClass} placeholder="e.g. IIT Delhi" /></div>
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Email Address</label>
-                <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="you@college.edu" /></div>
-              </div>
-              <div>
-                <label className="mb-1 block text-[11px] font-semibold text-zinc-300">Password</label>
-                <div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" /><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} placeholder="Enter your password" /></div>
-              </div>
-
-              <button type="submit" disabled={loading} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-bold text-zinc-950 shadow-lg shadow-black/20 transition-all hover:bg-zinc-200 active:scale-[0.99] disabled:opacity-50">
-                {loading ? 'Authenticating...' : isRegister ? 'Create account' : 'Sign in'} <ArrowRight className="h-4 w-4" />
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-zinc-300">Create a new account</p>
+              <button type="button" onClick={handleGoogleLogin} className="flex w-full items-center justify-center rounded-xl bg-white py-3 font-bold text-zinc-950 shadow-lg shadow-black/20 transition-all hover:bg-zinc-200 active:scale-[0.99]">
+                Continue with Google
               </button>
-            </form>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-zinc-500" aria-hidden="true">
+              <span className="h-px flex-1 bg-white/10" />
+              <span>or</span>
+              <span className="h-px flex-1 bg-white/10" />
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold text-zinc-300">Already have an account?</p>
+              <button type="button" onClick={() => setIsEmailLoginOpen(true)} className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-[#18191b] py-3 font-bold text-white transition-all hover:border-zinc-500 hover:bg-[#202124] active:scale-[0.99]">
+                Login with Email
+              </button>
+              {isEmailLoginOpen && (
+                <form onSubmit={handleEmailLogin} className="space-y-2 pt-1">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="Email"
+                    className="w-full rounded-xl border border-[#303238] bg-[#18191b] px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-500"
+                  />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Password"
+                    className="w-full rounded-xl border border-[#303238] bg-[#18191b] px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-500"
+                  />
+                  <button type="submit" className="flex w-full items-center justify-center rounded-xl bg-white py-2.5 text-sm font-bold text-zinc-950 shadow-lg shadow-black/20 transition-all hover:bg-zinc-200 active:scale-[0.99]">
+                    Login
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </div>

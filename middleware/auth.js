@@ -1,15 +1,22 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { authenticateFirebase } from "./firebaseAuth.js";
 
 export async function authenticate(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.unauthorized({ error: "No token provided" });
+  }
+
+  let decoded;
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return authenticateFirebase(req, res, next);
+  }
 
-    if (!token) {
-      return res.unauthorized({ error: "No token provided" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  try {
     const user = await User.findById(decoded.id);
 
     if (!user || !user.isActive) {
@@ -18,8 +25,8 @@ export async function authenticate(req, res, next) {
 
     req.user = user;
     return next();
-  } catch (error) {
-    res.unauthorized({ error: error.message });
+  } catch {
+    return res.serverError({ error: "Authentication is unavailable" });
   }
 }
 

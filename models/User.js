@@ -21,26 +21,28 @@ const userSchema = new mongoose.Schema(
         "Please provide a valid email"
       ]
     },
+    firebaseUid: {
+      type: String,
+      trim: true,
+      unique: true,
+      sparse: true
+    },
     password: {
       type: String,
-      required: [true, "Password is required"],
       minlength: 6,
       select: false
     },
     phone: {
       type: String,
-      trim: true,
-      required: [true, "Phone number is required"]
+      trim: true
     },
     collegeId: {
       type: String,
-      trim: true,
-      required: [true, "College ID is required"]
+      trim: true
     },
     collegeName: {
       type: String,
-      trim: true,
-      required: [true, "College name is required"]
+      trim: true
     },
     address: {
       street: String,
@@ -63,7 +65,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") || !this.password) return next();
 
   try {
     const salt = await bcryptjs.genSalt(10);
@@ -77,5 +79,14 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcryptjs.compare(enteredPassword, this.password);
 };
+
+userSchema.virtual("profileComplete").get(function () {
+  return Boolean(
+    this.name?.trim() &&
+    this.phone?.trim() &&
+    this.collegeId?.trim() &&
+    this.collegeName?.trim()
+  );
+});
 
 export default mongoose.model("User", userSchema);
