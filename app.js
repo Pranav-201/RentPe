@@ -18,6 +18,14 @@ export function createApp() {
     origin: process.env.CORS_ORIGIN || "http://localhost:5173"
   });
 
+  app.use((req, res, next) => {
+    if (req.method === "OPTIONS") {
+      return res.noContent();
+    }
+
+    return next();
+  });
+
   app.rateLimit({
     windowMs: 60000,
     max: 100
