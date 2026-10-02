@@ -4,6 +4,7 @@ import { connectDB, disconnectDB } from "./config/database.js";
 import { initializeSocket } from "./services/socketService.js";
 
 const PORT = process.env.PORT || 3000;
+const HOST = "0.0.0.0";
 
 async function startServer() {
   try {
@@ -11,7 +12,7 @@ async function startServer() {
     const app = createApp();
     initializeSocket(app.server);
 
-    app.listen(PORT, () => {
+    app.server.listen(PORT, HOST, () => {
       console.log(`
 ╔═══════════════════════════════════════╗
 ║   Zingoo E-commerce Backend API       ║
