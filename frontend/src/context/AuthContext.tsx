@@ -120,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       case 'auth/network-request-failed':
         return 'Network error. Check your connection and try again.';
       default:
-        return 'Unable to sign in. Please try again.';
+        return 'Incorrect Password';
     }
   };
 
