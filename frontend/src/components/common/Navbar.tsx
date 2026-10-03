@@ -204,7 +204,7 @@ export const Navbar: React.FC = () => {
         tone="graphite"
         showHeader={false}
       >
-        <div className="relative space-y-5 py-1 sm:px-0">
+        <div className="relative -m-6 space-y-5 bg-black p-6 sm:-m-6 sm:p-6">
           <button
             type="button"
             aria-label="Close login dialog"
@@ -216,7 +216,7 @@ export const Navbar: React.FC = () => {
 
           <div className="flex flex-col items-center gap-4 pt-1 text-center">
             <img src="/rentpe-logo.png" alt="RentPe" className="h-11 w-auto object-contain" />
-            <h2 className="text-3xl font-semibold tracking-tight text-white">Login to your account</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">Login to your account</h2>
           </div>
 
           <div className="space-y-3">
