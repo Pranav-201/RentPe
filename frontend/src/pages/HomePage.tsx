@@ -15,6 +15,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { XeroHero } from '../components/XeroHero';
+import { openSignInModal } from '../config/signInModal';
 
 export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -98,7 +99,7 @@ export const HomePage: React.FC = () => {
             onClick={(event) => {
               if (!isAuthenticated) {
                 event.preventDefault();
-                error('Sign in required to list an item');
+                openSignInModal();
               }
             }}
             className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-xl px-4 py-2 transition-colors"

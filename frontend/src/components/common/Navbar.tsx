@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { Modal } from './Modal';
+import { OPEN_SIGN_IN_MODAL_EVENT } from '../../config/signInModal';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, signInWithEmail, signInWithGoogle } = useAuth();
@@ -22,6 +23,12 @@ export const Navbar: React.FC = () => {
   const [password, setPassword] = useState('');
 
   const totalCartItems = cart?.items?.length || 0;
+
+  useEffect(() => {
+    const openModal = () => setIsAuthModalOpen(true);
+    window.addEventListener(OPEN_SIGN_IN_MODAL_EVENT, openModal);
+    return () => window.removeEventListener(OPEN_SIGN_IN_MODAL_EVENT, openModal);
+  }, []);
 
   const handleEmailLogin = async () => {
     try {

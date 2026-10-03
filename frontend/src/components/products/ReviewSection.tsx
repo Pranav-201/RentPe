@@ -80,14 +80,14 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <h3 className="flex items-center gap-2 text-base font-bold leading-snug text-slate-100 sm:text-lg">
             <MessageSquare className="w-5 h-5 text-indigo-400" />
             Customer Reviews ({reviews.length})
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="mt-0.5 max-w-[19rem] text-xs leading-relaxed text-slate-400 sm:max-w-none">
             Verified ratings and feedback from developers and customers
           </p>
         </div>
@@ -95,7 +95,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
         {isAuthenticated && !userHasReviewed && !isFormOpen && (
           <button
             onClick={() => setIsFormOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-indigo-600/20 transition-all hover:bg-indigo-500 sm:w-auto"
           >
             <Plus className="w-4 h-4" /> Write a Review
           </button>
@@ -106,7 +106,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
       {isFormOpen && (
         <form
           onSubmit={handleSubmit}
-          className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 animate-in fade-in duration-200"
+          className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-3.5 animate-in fade-in duration-200 sm:p-5"
         >
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <span className="text-sm font-semibold text-slate-200">Share Your Experience</span>
@@ -171,11 +171,11 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex pt-2 sm:justify-end">
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 disabled:opacity-50 transition-all"
+              className="w-full rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/30 transition-all hover:bg-indigo-500 disabled:opacity-50 sm:w-auto"
             >
               {submitting ? 'Publishing...' : 'Submit Review'}
             </button>
@@ -188,7 +188,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
         {loading ? (
           <div className="text-center py-6 text-xs text-slate-500">Loading reviews...</div>
         ) : reviews.length === 0 ? (
-          <div className="p-8 rounded-2xl bg-slate-900/40 border border-dashed border-slate-800 text-center">
+          <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-5 text-center sm:p-8">
             <p className="text-xs text-slate-400">No reviews yet for this product.</p>
             <p className="text-[11px] text-slate-500 mt-0.5">Be the first to share your thoughts!</p>
           </div>
@@ -204,10 +204,10 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
             return (
               <div
                 key={rev._id}
-                className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-2"
+                className="space-y-2 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3.5 sm:p-4"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-2">
                     <div className="flex items-center gap-0.5 text-amber-400">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
@@ -218,7 +218,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onRevie
                         />
                       ))}
                     </div>
-                    <span className="font-semibold text-slate-200 text-xs">{rev.title}</span>
+                    <span className="truncate text-xs font-semibold text-slate-200">{rev.title}</span>
                   </div>
 
                   <div className="flex items-center gap-2">

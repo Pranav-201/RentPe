@@ -66,6 +66,8 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSmartSearch, setIsSmartSearch] = useState(false);
+  const [starterPlaceholderIndex, setStarterPlaceholderIndex] = useState(0);
+  const [typedPlaceholder, setTypedPlaceholder] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -168,6 +170,36 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
   };
 
   const starterPrompts = isSmartSearch ? SMART_SEARCH_STARTER_PROMPTS : NORMAL_STARTER_PROMPTS;
+
+  useEffect(() => {
+    if (!isOpen || input) return;
+
+    setStarterPlaceholderIndex(0);
+    const timer = window.setInterval(() => {
+      setStarterPlaceholderIndex((current) => (current + 1) % starterPrompts.length);
+    }, 3000);
+
+    return () => window.clearInterval(timer);
+  }, [input, isOpen, isSmartSearch, starterPrompts.length]);
+
+  const inputPlaceholder = starterPrompts[starterPlaceholderIndex];
+
+  useEffect(() => {
+    if (!isOpen || input) {
+      setTypedPlaceholder('');
+      return;
+    }
+
+    let characterIndex = 0;
+    setTypedPlaceholder('');
+    const timer = window.setInterval(() => {
+      characterIndex += 1;
+      setTypedPlaceholder(inputPlaceholder.slice(0, characterIndex));
+      if (characterIndex >= inputPlaceholder.length) window.clearInterval(timer);
+    }, 45);
+
+    return () => window.clearInterval(timer);
+  }, [input, inputPlaceholder, isOpen]);
 
   if (!isOpen) return null;
 
@@ -522,38 +554,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ── Starter Prompts ── */}
-        {messages.length <= 2 && !loading && (
-          <div
-            className="px-3 py-2.5 flex-shrink-0"
-            style={{
-              borderTop: '1px solid rgba(255,255,255,0.05)',
-              background: '#0a0a0a',
-            }}
-          >
-            <p className="text-[9px] text-zinc-600 uppercase tracking-widest font-semibold mb-1.5">
-              {isSmartSearch ? 'Suggested Project Queries' : 'Suggested'}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {starterPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handleSend(prompt)}
-                  className="flex items-center gap-1 px-2 py-1 text-[10px] text-zinc-500 hover:text-zinc-200 transition-colors text-left"
-                  style={{
-                    background: '#141414',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 7,
-                  }}
-                >
-                  <span className="truncate max-w-[280px]">{prompt}</span>
-                  <ArrowRight className="w-2 h-2 text-zinc-600 flex-shrink-0" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* ── Input ── */}
         <div
           className="px-3 py-2.5 flex-shrink-0"
@@ -623,7 +623,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Describe your project or what items you need..."
+                  placeholder={typedPlaceholder}
                   disabled={loading}
                   className="flex-1 max-h-20 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none resize-none"
                   style={{
@@ -642,7 +642,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask anything about RentPe..."
+                placeholder={typedPlaceholder}
                 disabled={loading}
                 className="flex-1 max-h-20 text-xs text-zinc-100 placeholder:text-zinc-700 focus:outline-none resize-none"
                 style={{

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, ShoppingBag, LogIn, PlusCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -8,18 +8,6 @@ import { OrderManager } from '../components/admin/OrderManager';
 export const AdminDashboardPage: React.FC = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
-  const [pendingTab, setPendingTab] = useState<'products' | 'orders' | null>(null);
-
-  useEffect(() => {
-    if (!pendingTab) return;
-
-    const timer = window.setTimeout(() => {
-      setActiveTab(pendingTab);
-      setPendingTab(null);
-    }, 3000);
-
-    return () => window.clearTimeout(timer);
-  }, [pendingTab]);
 
   if (authLoading) {
     return (
@@ -75,7 +63,7 @@ export const AdminDashboardPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => {
-                  if (tab.id !== activeTab) setPendingTab(tab.id);
+                  if (tab.id !== activeTab) setActiveTab(tab.id);
                 }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
@@ -92,21 +80,9 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Active Tab Panel */}
-      <div key={pendingTab || activeTab} className="animate-in fade-in slide-in-from-bottom-1 duration-300">
-        {pendingTab ? (
-          <div className="admin-tab-loader" aria-label="Loading rental requests">
-            <div className="admin-tab-loader-dot" />
-            <div className="admin-tab-loader-dot" />
-            <div className="admin-tab-loader-dot" />
-            <div className="admin-tab-loader-dot" />
-            <div className="admin-tab-loader-dot" />
-          </div>
-        ) : (
-          <>
-            {activeTab === 'products' && <ProductManager />}
-            {activeTab === 'orders' && <OrderManager />}
-          </>
-        )}
+      <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-1 duration-300">
+        {activeTab === 'products' && <ProductManager />}
+        {activeTab === 'orders' && <OrderManager />}
       </div>
     </div>
   );

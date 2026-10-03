@@ -27,6 +27,7 @@ export const orderService = {
     limit?: number;
     status?: string;
     type?: string;
+    productId?: string;
   }): Promise<OrderListResponse> {
     const res = await apiClient.get<OrderListResponse>('/orders', { params });
     return res.data;

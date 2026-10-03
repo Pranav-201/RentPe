@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, X, ArrowUpDown, ChevronDown, Check, Sparkles, ArrowUp, ArrowDown, Star, GraduationCap } from 'lucide-react';
+import { Search, X, ArrowUpDown, ChevronDown, Check, Sparkles, ArrowUp, ArrowDown, Star, GraduationCap, ChevronRight } from 'lucide-react';
 import { Category } from '../../types';
 import { CampusSearchModal } from './CampusSearchModal';
 
@@ -88,10 +88,20 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         <button
           type="button"
           onClick={() => setIsCampusSearchOpen(true)}
-          className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-medium bg-zinc-900/40 text-zinc-300 border border-zinc-800/70 hover:border-zinc-700 hover:text-zinc-100 hover:bg-zinc-800/60 transition-all duration-200 whitespace-nowrap cursor-pointer shadow-sm"
+          aria-label="Search rental listings by campus"
+          className="group flex min-h-11 w-full items-center justify-between rounded-xl border border-violet-400/25 bg-gradient-to-r from-violet-500/15 to-indigo-500/10 px-3 text-zinc-100 shadow-sm transition-all duration-200 hover:border-violet-400/45 hover:from-violet-500/25 hover:to-indigo-500/20 active:scale-[0.99] sm:min-h-0 sm:w-auto sm:justify-center sm:gap-2 sm:px-3.5 sm:py-2.5"
         >
-          <GraduationCap className="w-4 h-4 text-zinc-400" />
-          <span>Campus Search</span>
+          <span className="flex items-center gap-2.5 sm:gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-400/15 text-violet-200 transition-colors group-hover:bg-violet-400/25">
+              <GraduationCap className="h-4 w-4" />
+            </span>
+            <span className="flex flex-col items-start leading-tight sm:block">
+              <span className="text-xs font-semibold sm:hidden">Search by campus</span>
+              <span className="hidden text-xs font-medium sm:inline">Campus Search</span>
+              <span className="mt-0.5 text-[10px] text-zinc-400 sm:hidden">Browse listings from your college</span>
+            </span>
+          </span>
+          <ChevronRight className="h-4 w-4 text-violet-200/80 sm:hidden" aria-hidden="true" />
         </button>
 
         {/* Secondary controls: In-Stock Toggle & Custom Sort Popover & Reset */}

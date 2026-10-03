@@ -240,8 +240,58 @@ export const ProductManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Products Table */}
-      <div className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-900/60 silver-card">
+      {/* Mobile listing cards — avoid forcing the management table to scroll sideways. */}
+      <div className="space-y-3 md:hidden">
+        {loading ? (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-8 text-center text-xs text-zinc-500">Loading your rental listings...</div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-8 text-center">
+            <PackageOpen className="mx-auto mb-2 h-8 w-8 text-zinc-500" />
+            <p className="text-sm font-semibold text-zinc-200">{search ? 'No matching listings found' : "You haven't listed any items for rent yet"}</p>
+            <p className="mt-1 text-xs text-zinc-400">{search ? 'Try adjusting your search keywords.' : 'Add an item to start earning rental income.'}</p>
+            {!search && <button onClick={openCreateModal} className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-zinc-100 px-4 py-2 text-xs font-semibold text-zinc-950"><Plus className="h-4 w-4" />List Your First Item</button>}
+          </div>
+        ) : (
+          filteredProducts.map((p) => {
+            const catName = typeof p.category === 'object' && p.category !== null ? p.category.name : 'General';
+            const img = p.images?.[0]?.url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80';
+            const campus = p.location && p.location !== 'On Campus' ? p.location : (typeof p.owner === 'object' && p.owner?.collegeName) || user?.collegeName || 'Campus';
+
+            return (
+              <article key={p._id} className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-xs silver-card">
+                <div className="flex gap-3">
+                  <img src={img} alt="" className="h-14 w-14 shrink-0 rounded-xl border border-zinc-800 bg-zinc-950 object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-zinc-100">{p.name}</p>
+                    <p className="mt-1 truncate font-mono text-[10px] text-zinc-400">{p.sku}</p>
+                    <span className="mt-2 inline-flex max-w-full truncate rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[10px] text-zinc-300">{catName}</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-3 border-y border-zinc-800 py-3">
+                  <div><p className="text-[10px] uppercase tracking-wide text-zinc-500">Daily rate</p><p className="mt-1 font-mono font-bold text-zinc-100">₹{p.price.toFixed(0)}<span className="font-normal text-zinc-400">/day</span></p>{p.discountPrice ? <p className="mt-0.5 text-[10px] text-zinc-400">Sale: ₹{p.discountPrice.toFixed(0)}/day</p> : null}</div>
+                  <div><p className="text-[10px] uppercase tracking-wide text-zinc-500">Campus</p><p className="mt-1 flex items-center gap-1 truncate text-zinc-300"><GraduationCap className="h-3 w-3 shrink-0 text-zinc-400" />{campus}</p></div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <select value={p.status || (p.isAvailable === false ? 'Unavailable' : 'Available')} onChange={(e) => handleStatusChange(p, e.target.value as ProductStatus)} className="min-w-0 rounded-lg border border-zinc-800 bg-zinc-950 px-2 py-2 text-[11px] text-zinc-200 focus:outline-none focus:border-zinc-500" aria-label={`Status for ${p.name}`}>
+                    <option value="Available">Available</option>
+                    <option value="Already Rented">Already Rented</option>
+                    <option value="Unavailable">Unavailable</option>
+                  </select>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditModal(p)} className="rounded-lg bg-zinc-800 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white" title="Edit Listing"><Edit2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete(p._id)} className="rounded-lg bg-zinc-800 p-2 text-zinc-300 transition-colors hover:bg-rose-950/50 hover:text-rose-400" title="Remove Listing"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+
+      {/* Full table remains unchanged on tablet and desktop. */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-900/60 silver-card md:block">
         <table className="w-full text-left text-xs text-zinc-300">
           <thead className="bg-zinc-950/90 text-zinc-400 uppercase tracking-wider text-[10px] font-mono border-b border-zinc-800">
             <tr>

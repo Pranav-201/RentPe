@@ -59,11 +59,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="group relative flex flex-col bg-zinc-900/60 border border-zinc-800/90 rounded-2xl overflow-hidden hover:border-zinc-700 hover:shadow-xl hover:shadow-black/40 transition-all duration-300 silver-card-hover">
       {/* Image & Badges */}
-      <Link to={`/products/${product._id}`} className="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+      <Link to={`/products/${product._id}`} className="relative block overflow-hidden bg-zinc-950">
         <img
           src={defaultImage}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+          className="block w-full h-auto object-contain transition-opacity duration-500 opacity-90 group-hover:opacity-100"
           loading="lazy"
         />
 

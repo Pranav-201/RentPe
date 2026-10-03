@@ -131,8 +131,70 @@ export const OrderManager: React.FC = () => {
         </button>
       </div>
 
-      {/* Orders Table */}
-      <div className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-900/60">
+      {/* Mobile request cards — keep every detail visible without horizontal scrolling. */}
+      <div className="space-y-3 md:hidden">
+        {loading ? (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-8 text-center text-xs text-zinc-500">
+            <Loader2 className="mx-auto mb-2 h-4 w-4 animate-spin text-zinc-400" />
+            Loading rental requests...
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-8 text-center text-xs text-zinc-500">
+            <Package className="mx-auto mb-2 h-8 w-8 opacity-40" />
+            No rental requests or orders found.
+          </div>
+        ) : (
+          orders.map((o) => {
+            const item = o.items?.[0];
+            const product = item?.product;
+            const renter = typeof o.user === 'object' ? o.user : null;
+            const isActionBusy = actionLoadingId === o._id;
+
+            return (
+              <article key={o._id} className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-xs">
+                <div className="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
+                  <div className="min-w-0">
+                    <p className="font-mono font-semibold text-zinc-200">{o.orderNumber || `#${o._id.slice(-6).toUpperCase()}`}</p>
+                    <p className="mt-1 text-[11px] text-zinc-400">
+                      {new Date(o.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  {getStatusBadge(o.status)}
+                </div>
+
+                <div className="flex items-center gap-3 py-3">
+                  {product?.images?.[0]?.url ? (
+                    <img src={product.images[0].url} alt="" className="h-11 w-11 shrink-0 rounded-lg border border-zinc-800 bg-zinc-950 object-cover" />
+                  ) : (
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950"><Package className="h-4 w-4 text-zinc-500" /></div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-zinc-100">{product?.name || 'Rental Item'}</p>
+                    <p className="mt-1 truncate text-[11px] text-zinc-400">{renter?.name || 'Student Customer'}{renter?.collegeName ? ` • ${renter.collegeName}` : ''}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 border-t border-zinc-800 pt-3">
+                  <div><p className="text-[10px] uppercase tracking-wide text-zinc-500">Total</p><p className="mt-1 font-mono font-bold text-white">₹{(o.finalPrice || o.totalPrice || 0).toFixed(0)}{item?.quantity ? <span className="ml-1 font-normal text-zinc-400">({item.quantity}d)</span> : null}</p></div>
+                  <div><p className="text-[10px] uppercase tracking-wide text-zinc-500">Payment</p><p className="mt-1 font-mono text-zinc-200">{o.paymentStatus === 'completed' ? 'Paid' : 'On-Pickup'}</p><p className="text-[10px] text-zinc-400">{o.paymentMethod || 'Cash/UPI'}</p></div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-zinc-800 pt-3">
+                  {o.status === 'pending' && <>
+                    <button onClick={() => handleQuickAccept(o)} disabled={isActionBusy} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 font-bold text-white transition-all disabled:opacity-50">{isActionBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}Accept</button>
+                    <button onClick={() => handleQuickDecline(o)} disabled={isActionBusy} className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 font-semibold text-zinc-300 transition-all disabled:opacity-50"><XCircle className="h-3.5 w-3.5" />Decline</button>
+                  </>}
+                  {(o.status === 'accepted' || o.status === 'confirmed') && <button onClick={() => openChat(o)} className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 font-bold text-white"><MessageSquare className="h-3.5 w-3.5" />Chat</button>}
+                  {(o.status === 'declined' || o.status === 'cancelled') && <span className="py-2 font-mono text-[11px] text-zinc-400">{o.status === 'declined' ? 'Declined' : 'Cancelled'}</span>}
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+
+      {/* Full table remains unchanged on tablet and desktop. */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-900/60 md:block">
         <table className="w-full text-left text-xs text-zinc-300">
           <thead className="bg-zinc-950 text-zinc-400 uppercase tracking-wider text-[10px] border-b border-zinc-800 font-mono">
             <tr>

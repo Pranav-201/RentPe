@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { openSignInModal } from '../config/signInModal';
 import './XeroHero.css';
 
 interface XeroHeroProps {
@@ -36,7 +36,6 @@ const campusEngineeringProducts = [
 export const XeroHero: React.FC<XeroHeroProps> = ({ onBrowseClick, hideNav = false }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { error } = useToast();
 
   // References requested by specs
   const pipelineRef = useRef<HTMLDivElement>(null);
@@ -483,7 +482,7 @@ export const XeroHero: React.FC<XeroHeroProps> = ({ onBrowseClick, hideNav = fal
               onClick={(event) => {
                 if (!isAuthenticated) {
                   event.preventDefault();
-                  error('Sign in required to list an item');
+                  openSignInModal();
                 }
               }}
               className="btn-login"

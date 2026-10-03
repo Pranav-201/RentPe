@@ -26,7 +26,7 @@ export const RootLayout: React.FC = () => {
         </main>
         {!isAuthPage && !isAdminPage && !isTermsPage && <Footer />}
         <CartDrawer />
-        {!isAuthPage && <FloatingAIChatWidget />}
+        {!isAuthPage && !isAdminPage && <FloatingAIChatWidget />}
       </div>
     </div>
   );

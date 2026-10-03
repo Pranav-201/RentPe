@@ -166,7 +166,7 @@ export async function createOrder(req, res) {
 export async function getOrders(req, res) {
   try {
     const { page, limit, skip } = getPaginationParams(req.query);
-    const { status, type } = req.query;
+    const { status, type, productId } = req.query;
 
     let filter = {};
 
@@ -190,6 +190,11 @@ export async function getOrders(req, res) {
       // Normal customer orders OR all requests related to this user
       filter = { user: req.user._id };
       if (status) filter.status = status;
+    }
+
+    if (productId) {
+      const matchingOrderItems = await OrderItem.find({ product: productId }).select("_id");
+      filter.items = { $in: matchingOrderItems.map((item) => item._id) };
     }
 
     const orders = await Order.find(filter)

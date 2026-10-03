@@ -13,6 +13,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
 import { Order } from '../types';
@@ -22,6 +23,7 @@ import { TERMS_ACCEPTED_KEY } from './TermsPage';
 
 export const CartPage: React.FC = () => {
   const { cart, loading, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const { error } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,8 +88,36 @@ export const CartPage: React.FC = () => {
       : null;
 
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+  const [checkingExistingOrder, setCheckingExistingOrder] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { success } = useToast();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadExistingOrder = async () => {
+      if (!isAuthenticated || !selectedProduct?._id) {
+        setActiveOrder(null);
+        return;
+      }
+
+      setCheckingExistingOrder(true);
+      try {
+        const { orders } = await orderService.getOrders({
+          productId: selectedProduct._id,
+          limit: 1,
+        });
+        if (!cancelled) setActiveOrder(orders[0] || null);
+      } catch {
+        if (!cancelled) setActiveOrder(null);
+      } finally {
+        if (!cancelled) setCheckingExistingOrder(false);
+      }
+    };
+
+    loadExistingOrder();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, selectedProduct?._id]);
 
   const handleMessageOwner = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -374,10 +404,10 @@ export const CartPage: React.FC = () => {
                 <button
                   type={activeOrder ? 'button' : 'submit'}
                   onClick={activeOrder ? () => setIsChatOpen(true) : undefined}
-                  disabled={submitting}
+                  disabled={submitting || checkingExistingOrder}
                   className="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-md shadow-violet-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                 >
-                  <MessageSquare className="w-4 h-4" /> {activeOrder ? 'See Messages' : submitting ? 'Sending Request...' : 'Message Owner'}
+                  <MessageSquare className="w-4 h-4" /> {activeOrder ? 'See Messages' : checkingExistingOrder ? 'Loading Messages...' : submitting ? 'Sending Request...' : 'Message Owner'}
                 </button>
               </div>
             </form>
