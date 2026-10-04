@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
   onIdTokenChanged,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -25,7 +27,9 @@ interface AuthContextType {
   login: (credentials: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<FirebaseUser>;
+  signUpWithEmail: (email: string, password: string) => Promise<FirebaseUser>;
+  resendVerificationEmail: (customUser?: FirebaseUser | null) => Promise<void>;
   getFirebaseIdToken: (forceRefresh?: boolean) => Promise<string | null>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
@@ -79,6 +83,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      // If registered/logged in via password, verify email before granting normal RentPe access
+      const isPasswordProvider = currentFirebaseUser.providerData.some(
+        (p) => p.providerId === 'password'
+      );
+      if (isPasswordProvider && !currentFirebaseUser.emailVerified) {
+        setFirebaseToken(null);
+        setFirebaseLoading(false);
+        setUser(null);
+        return;
+      }
+
       let idToken: string;
       try {
         idToken = await currentFirebaseUser.getIdToken();
@@ -105,8 +120,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getFirebaseErrorMessage = (err: any) => {
     switch (err?.code) {
+      case 'auth/email-already-in-use':
+        return 'An account with this email already exists. Please log in instead.';
       case 'auth/invalid-email':
         return 'Enter a valid email address.';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters.';
       case 'auth/invalid-credential':
       case 'auth/user-not-found':
       case 'auth/wrong-password':
@@ -117,10 +136,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return 'Your browser blocked the sign-in popup. Please allow popups and try again.';
       case 'auth/account-exists-with-different-credential':
         return 'An account already exists with a different sign-in method.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
       case 'auth/network-request-failed':
         return 'Network error. Check your connection and try again.';
+      case 'auth/unverified-email':
+        return 'Please verify your email before signing in.';
       default:
-        return 'Incorrect Password';
+        return err?.message || 'Incorrect email or password.';
     }
   };
 
@@ -161,9 +184,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signUpWithEmail = async (email: string, password: string): Promise<FirebaseUser> => {
     try {
-      await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      await sendEmailVerification(userCredential.user);
+      return userCredential.user;
+    } catch (err: any) {
+      const message = getFirebaseErrorMessage(err);
+      error(message);
+      throw new Error(message);
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string): Promise<FirebaseUser> => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      await userCredential.user.reload();
+
+      const isPasswordProvider = userCredential.user.providerData.some(
+        (p) => p.providerId === 'password'
+      );
+
+      if (isPasswordProvider && !userCredential.user.emailVerified) {
+        const unverifiedError: any = new Error('Please verify your email before signing in.');
+        unverifiedError.code = 'auth/unverified-email';
+        unverifiedError.user = userCredential.user;
+        error('Please verify your email before signing in.');
+        throw unverifiedError;
+      }
+
+      return userCredential.user;
+    } catch (err: any) {
+      if (err?.code !== 'auth/unverified-email') {
+        const message = getFirebaseErrorMessage(err);
+        error(message);
+      }
+      throw err;
+    }
+  };
+
+  const resendVerificationEmail = async (customUser?: FirebaseUser | null) => {
+    try {
+      const targetUser = customUser || firebaseAuth.currentUser;
+      if (!targetUser) {
+        throw new Error('No account found to resend verification email. Please log in first.');
+      }
+      await sendEmailVerification(targetUser);
+      success('Verification email sent successfully.');
     } catch (err: any) {
       const message = getFirebaseErrorMessage(err);
       error(message);
@@ -266,6 +333,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         signInWithGoogle,
         signInWithEmail,
+        signUpWithEmail,
+        resendVerificationEmail,
         getFirebaseIdToken,
         logout,
         updateProfile,
