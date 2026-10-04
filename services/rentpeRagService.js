@@ -8,6 +8,11 @@ import zingoo, {
 } from "zingoo";
 import { Pinecone } from "@pinecone-database/pinecone";
 import Product from "../models/Product.js";
+import Category from "../models/Category.js";
+import User from "../models/User.js";
+
+const RETRIEVAL_TOP_K = 15;
+const SIMILARITY_THRESHOLD = 0.35;
 
 class RentPeRagService {
   constructor() {
@@ -74,24 +79,59 @@ class RentPeRagService {
   }
 
   formatListingDocument(product) {
-    const categoryName =
-      product.category && typeof product.category === "object"
-        ? product.category.name
-        : product.category || "General";
+    let categoryName = "General";
+    if (product.category) {
+      if (typeof product.category === "object" && product.category.name) {
+        categoryName = String(product.category.name).trim();
+      } else if (
+        typeof product.category === "string" &&
+        product.category.trim() &&
+        product.category !== "undefined" &&
+        product.category !== "null" &&
+        product.category !== "[object Object]" &&
+        !/^[0-9a-fA-F]{24}$/.test(product.category.trim())
+      ) {
+        categoryName = product.category.trim();
+      }
+    }
+    if (
+      !categoryName ||
+      categoryName === "undefined" ||
+      categoryName === "null" ||
+      categoryName === "[object Object]"
+    ) {
+      categoryName = "General";
+    }
 
-    const tags = Array.isArray(product.tags) ? product.tags.join(", ") : "";
+    const tags = Array.isArray(product.tags)
+      ? product.tags
+          .map((t) => (typeof t === "string" ? t.trim() : ""))
+          .filter(Boolean)
+          .join(", ")
+      : typeof product.tags === "string" &&
+        product.tags.trim() &&
+        product.tags !== "undefined" &&
+        product.tags !== "null"
+      ? product.tags.trim()
+      : "";
 
-    const content = [
-      `Title: ${product.name}`,
+    const name = (product.name || "").trim();
+    const condition = product.condition || "Good";
+    const location = product.location || "On Campus";
+    const priceVal = product.pricePerDay || product.price || 0;
+    const description = (product.description || "").trim();
+
+    const contentLines = [
+      `Title: ${name}`,
       `Category: ${categoryName}`,
-      `Condition: ${product.condition || "Good"}`,
-      `Location: ${product.location || "On Campus"}`,
-      `Price: ₹${product.pricePerDay || product.price || 0}/day`,
       tags ? `Tags: ${tags}` : "",
-      `Description: ${product.description || ""}`
-    ]
-      .filter(Boolean)
-      .join("\n");
+      `Condition: ${condition}`,
+      `Location: ${location}`,
+      `Price: ₹${priceVal}/day`,
+      description ? `Description: ${description}` : ""
+    ].filter(Boolean);
+
+    const content = contentLines.join("\n");
 
     return {
       id: product._id.toString(),
@@ -100,7 +140,7 @@ class RentPeRagService {
         listingId: product._id.toString(),
         name: product.name,
         category: categoryName,
-        price: product.pricePerDay || product.price || 0,
+        price: priceVal,
         type: "rentpe-listing"
       }
     };
@@ -166,8 +206,6 @@ class RentPeRagService {
     };
   }
 
- 
-
   async deleteListingFromIndex(productId) {
     try {
       await this.initRag();
@@ -182,82 +220,65 @@ class RentPeRagService {
     }
   }
 
-  // async searchCandidateListings(searchQuery, topK = 6) {
-  //   await this.initRag();
-  //   if (!this.retriever) {
-  //     return [];
-  //   }
+  async searchCandidateListings(searchQuery, topK = RETRIEVAL_TOP_K) {
+    await this.initRag();
 
-  //   try {
-  //     const results = await this.retriever.retrieve(searchQuery, { topK });
-  //     if (!Array.isArray(results)) return [];
-
-  //     // Filter candidates with an empirical similarity threshold
-  //     // In cosine similarity (0 to 1), matches below 0.35 are random vector noise
-  //     return results
-  //       .filter((r) => {
-  //         const id = r.id || r.metadata?.listingId;
-  //         if (!id || typeof id !== "string") return false;
-  //         if (typeof r.score === "number" && r.score < 0.35) return false;
-  //         return true;
-  //       })
-  //       .map((r) => ({
-  //         id: r.id || r.metadata?.listingId,
-  //         score: typeof r.score === "number" ? r.score : 1.0,
-  //         content: r.content || "",
-  //         metadata: r.metadata || {}
-  //       }));
-  //   } catch (error) {
-  //     console.error("Vector retrieval error for query:", searchQuery, error);
-  //     return [];
-  //   }
-  // }
-
-  async searchCandidateListings(searchQuery, topK = 6) {
-  await this.initRag();
-
-  if (!this.retriever) {
-    console.warn("Retriever is not initialized");
-    return [];
-  }
-
-  try {
-    const results = await this.retriever.retrieve(searchQuery, { topK });
-
-    if (!Array.isArray(results)) {
+    if (!this.retriever) {
+      console.warn("Retriever is not initialized");
       return [];
     }
 
-    return results
-      .filter((r) => {
-        const id = r.id || r.metadata?.listingId;
+    try {
+      const results = await this.retriever.retrieve(searchQuery, { topK });
 
-        if (!id || typeof id !== "string") {
-          return false;
-        }
+      if (!Array.isArray(results)) {
+        return [];
+      }
 
-        if (typeof r.score === "number" && r.score < 0.35) {
-          return false;
-        }
+      const candidates = results
+        .filter((r) => {
+          const id = r.id || r.metadata?.listingId;
 
-        return true;
-      })
-      .map((r) => ({
-        id: r.id || r.metadata?.listingId,
-        score: typeof r.score === "number" ? r.score : 1.0,
-        content: r.content || "",
-        metadata: r.metadata || {}
-      }));
-  } catch (error) {
-    console.error(
-      "Vector retrieval error for query:",
-      searchQuery,
-      error.message
-    );
+          if (!id || typeof id !== "string") {
+            return false;
+          }
 
-    return [];
+          if (typeof r.score === "number" && r.score < SIMILARITY_THRESHOLD) {
+            return false;
+          }
+
+          return true;
+        })
+        .map((r) => ({
+          id: r.id || r.metadata?.listingId,
+          score: typeof r.score === "number" ? r.score : 1.0,
+          content: r.content || "",
+          metadata: r.metadata || {}
+        }));
+
+      console.log(`[SmartSearch] "${searchQuery}" → ${candidates.length} candidates (topK=${topK})`);
+      if (candidates.length > 0) {
+        console.log(
+          `[SmartSearch] Candidate scores:`,
+          candidates.map((c) => ({
+            id: c.id,
+            score: Number(c.score?.toFixed?.(3) ?? c.score),
+            name: c.metadata?.name
+          }))
+        );
+      }
+
+      return candidates;
+    } catch (error) {
+      console.error(
+        "Vector retrieval error for query:",
+        searchQuery,
+        error.message
+      );
+
+      return [];
+    }
   }
-}
 
   async extractIntentAndRequirements(app, userMessage) {
     const provider = this.getAIProvider();
@@ -444,7 +465,7 @@ Do not include markdown or backticks.`;
 
     for (const req of searchableRequirements) {
       const query = req.searchQuery || req.name;
-      const candidates = await this.searchCandidateListings(query, 6);
+      const candidates = await this.searchCandidateListings(query, RETRIEVAL_TOP_K);
 
       candidates.forEach((c) => allCandidateIds.add(c.id));
       requirementCandidatesMap.set(req.name, candidates);
