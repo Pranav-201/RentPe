@@ -166,6 +166,8 @@ class RentPeRagService {
     };
   }
 
+ 
+
   async deleteListingFromIndex(productId) {
     try {
       await this.initRag();
@@ -180,36 +182,82 @@ class RentPeRagService {
     }
   }
 
+  // async searchCandidateListings(searchQuery, topK = 6) {
+  //   await this.initRag();
+  //   if (!this.retriever) {
+  //     return [];
+  //   }
+
+  //   try {
+  //     const results = await this.retriever.retrieve(searchQuery, { topK });
+  //     if (!Array.isArray(results)) return [];
+
+  //     // Filter candidates with an empirical similarity threshold
+  //     // In cosine similarity (0 to 1), matches below 0.35 are random vector noise
+  //     return results
+  //       .filter((r) => {
+  //         const id = r.id || r.metadata?.listingId;
+  //         if (!id || typeof id !== "string") return false;
+  //         if (typeof r.score === "number" && r.score < 0.35) return false;
+  //         return true;
+  //       })
+  //       .map((r) => ({
+  //         id: r.id || r.metadata?.listingId,
+  //         score: typeof r.score === "number" ? r.score : 1.0,
+  //         content: r.content || "",
+  //         metadata: r.metadata || {}
+  //       }));
+  //   } catch (error) {
+  //     console.error("Vector retrieval error for query:", searchQuery, error);
+  //     return [];
+  //   }
+  // }
+
   async searchCandidateListings(searchQuery, topK = 6) {
-    await this.initRag();
-    if (!this.retriever) {
-      return [];
-    }
+  await this.initRag();
 
-    try {
-      const results = await this.retriever.retrieve(searchQuery, { topK });
-      if (!Array.isArray(results)) return [];
-
-      // Filter candidates with an empirical similarity threshold
-      // In cosine similarity (0 to 1), matches below 0.35 are random vector noise
-      return results
-        .filter((r) => {
-          const id = r.id || r.metadata?.listingId;
-          if (!id || typeof id !== "string") return false;
-          if (typeof r.score === "number" && r.score < 0.35) return false;
-          return true;
-        })
-        .map((r) => ({
-          id: r.id || r.metadata?.listingId,
-          score: typeof r.score === "number" ? r.score : 1.0,
-          content: r.content || "",
-          metadata: r.metadata || {}
-        }));
-    } catch (error) {
-      console.error("Vector retrieval error for query:", searchQuery, error);
-      return [];
-    }
+  if (!this.retriever) {
+    console.warn("Retriever is not initialized");
+    return [];
   }
+
+  try {
+    const results = await this.retriever.retrieve(searchQuery, { topK });
+
+    if (!Array.isArray(results)) {
+      return [];
+    }
+
+    return results
+      .filter((r) => {
+        const id = r.id || r.metadata?.listingId;
+
+        if (!id || typeof id !== "string") {
+          return false;
+        }
+
+        if (typeof r.score === "number" && r.score < 0.35) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((r) => ({
+        id: r.id || r.metadata?.listingId,
+        score: typeof r.score === "number" ? r.score : 1.0,
+        content: r.content || "",
+        metadata: r.metadata || {}
+      }));
+  } catch (error) {
+    console.error(
+      "Vector retrieval error for query:",
+      searchQuery,
+      error.message
+    );
+
+    return [];
+  }
+}
 
   async extractIntentAndRequirements(app, userMessage) {
     const provider = this.getAIProvider();
@@ -376,8 +424,10 @@ Do not include markdown or backticks.`;
       .map((c) => c.product._id.toString());
   }
 
+  
   async smartSearch(app, userMessage) {
     await this.initRag();
+    
 
     // 1. Understand user intent and generate requirements with Zingoo AI
     const { intent, requirements } = await this.extractIntentAndRequirements(app, userMessage);
@@ -394,7 +444,7 @@ Do not include markdown or backticks.`;
 
     for (const req of searchableRequirements) {
       const query = req.searchQuery || req.name;
-      const candidates = await this.searchCandidateListings(query, 5);
+      const candidates = await this.searchCandidateListings(query, 6);
 
       candidates.forEach((c) => allCandidateIds.add(c.id));
       requirementCandidatesMap.set(req.name, candidates);
@@ -473,6 +523,8 @@ Do not include markdown or backticks.`;
     };
   }
 }
+
+
 
 export const rentpeRagService = new RentPeRagService();
 
