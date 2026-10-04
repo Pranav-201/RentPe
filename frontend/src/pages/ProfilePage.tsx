@@ -162,9 +162,7 @@ export const ProfilePage: React.FC = () => {
                   >
                     Change Avatar
                   </button>
-                  <p className="text-[11px] text-zinc-500 mt-1.5">
-                    Choose from 8 built-in RentPe avatars
-                  </p>
+                 
                 </div>
               </div>
 
