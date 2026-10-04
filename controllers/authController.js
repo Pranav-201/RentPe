@@ -90,7 +90,7 @@ export async function getMe(req, res) {
 
 export async function updateProfile(req, res) {
   try {
-    const { name, phone, collegeName, collegeId, address } = req.body;
+    const { name, phone, collegeName, collegeId, address, avatar } = req.body;
 
     const updateData = {};
     if (name !== undefined) updateData.name = name;
@@ -98,6 +98,7 @@ export async function updateProfile(req, res) {
     if (collegeName !== undefined) updateData.collegeName = collegeName;
     if (collegeId !== undefined) updateData.collegeId = collegeId;
     if (address !== undefined) updateData.address = address;
+    if (avatar !== undefined) updateData.avatar = avatar;
 
     const user = await User.findByIdAndUpdate(
       req.user._id,

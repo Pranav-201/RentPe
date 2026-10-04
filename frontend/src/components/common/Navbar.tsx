@@ -214,11 +214,19 @@ export const Navbar: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 hover:border-zinc-700 transition-all text-xs font-medium"
+                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 hover:border-zinc-700 transition-all text-xs font-medium cursor-pointer"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold text-xs">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name || 'User'}
+                      className="w-6 h-6 rounded-lg object-cover border border-zinc-700"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold text-xs">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                  )}
                   <span className="hidden md:inline max-w-[100px] truncate text-zinc-300">{user?.name}</span>
                   <ChevronDown className="w-3 h-3 text-zinc-400" />
                 </button>
@@ -232,9 +240,17 @@ export const Navbar: React.FC = () => {
                     <div className="absolute right-0 mt-3 w-72 overflow-hidden rounded-2xl border border-zinc-700/80 bg-[#16171b]/95 shadow-2xl shadow-black/40 backdrop-blur-xl z-50 text-xs">
                       <div className="border-b border-zinc-800/90 bg-gradient-to-br from-zinc-800/80 via-zinc-900/70 to-[#16171b] p-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-600/80 bg-zinc-800 text-sm font-bold text-zinc-100 shadow-inner">
-                            {user?.name?.charAt(0).toUpperCase() || 'U'}
-                          </div>
+                          {user?.avatar ? (
+                            <img
+                              src={user.avatar}
+                              alt={user.name || 'User'}
+                              className="flex h-11 w-11 shrink-0 rounded-xl border border-zinc-600/80 object-cover shadow-inner"
+                            />
+                          ) : (
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-600/80 bg-zinc-800 text-sm font-bold text-zinc-100 shadow-inner">
+                              {user?.name?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                          )}
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
                             <p className="mt-0.5 truncate text-[11px] text-zinc-400">{user?.email}</p>

@@ -376,24 +376,38 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
 
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #27272a 0%, #18181b 100%)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '11px',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {otherInitials || 'U'}
-              </div>
+              {otherUser?.avatar ? (
+                <img
+                  src={otherUser.avatar}
+                  alt={otherName}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    objectFit: 'cover',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: 'linear-gradient(135deg, #27272a 0%, #18181b 100%)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {otherInitials || 'U'}
+                </div>
+              )}
               <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[#121215]" />
             </div>
 

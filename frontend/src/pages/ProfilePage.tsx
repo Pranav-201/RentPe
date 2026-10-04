@@ -5,11 +5,11 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { AvatarSelectModal } from '../components/profile/AvatarSelectModal';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
-  const { success } = useToast();
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   // Split name into first and last
   const [firstName, setFirstName] = useState(() => {
@@ -140,22 +140,30 @@ export const ProfilePage: React.FC = () => {
               {/* Avatar Row */}
               <div className="flex items-center gap-4 pb-2">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 border border-zinc-700 flex items-center justify-center text-white font-bold text-lg select-none shadow-inner">
-                    {initials || 'U'}
-                  </div>
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name || 'User avatar'}
+                      className="w-16 h-16 rounded-full object-cover border border-zinc-700 select-none shadow-inner"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 border border-zinc-700 flex items-center justify-center text-white font-bold text-lg select-none shadow-inner">
+                      {initials || 'U'}
+                    </div>
+                  )}
                   <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-zinc-950" />
                 </div>
 
                 <div>
                   <button
                     type="button"
-                    onClick={() => success('Avatar upload will be available in next update')}
-                    className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors"
+                    onClick={() => setIsAvatarModalOpen(true)}
+                    className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors cursor-pointer"
                   >
                     Change Avatar
                   </button>
                   <p className="text-[11px] text-zinc-500 mt-1.5">
-                    At least 800x800 px recommended. JPG or PNG is allowed
+                    Choose from 8 built-in RentPe avatars
                   </p>
                 </div>
               </div>
@@ -359,6 +367,15 @@ export const ProfilePage: React.FC = () => {
           </div>
         </form>
       </div>
+
+      <AvatarSelectModal
+        isOpen={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+        currentAvatar={user?.avatar}
+        onSave={async (avatarUrl) => {
+          await updateProfile({ avatar: avatarUrl });
+        }}
+      />
     </div>
   );
 };
