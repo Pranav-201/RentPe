@@ -9,6 +9,8 @@ import {
   PlusCircle,
   X,
   Mail,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -27,6 +29,9 @@ export const Navbar: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [unverifiedUser, setUnverifiedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +61,9 @@ export const Navbar: React.FC = () => {
     setIsAuthModalOpen(false);
     setPassword('');
     setConfirmPassword('');
+    setShowLoginPassword(false);
+    setShowSignupPassword(false);
+    setShowConfirmPassword(false);
     setIsSubmitting(false);
     setIsResending(false);
   };
@@ -341,15 +349,29 @@ export const Navbar: React.FC = () => {
                 </div>
                 <div>
                   <label htmlFor="login-password" className="block text-sm font-medium text-zinc-100 mb-1">Password</label>
-                  <input
-                    id="login-password"
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Password"
-                    required
-                    className="w-full rounded-xl border-2 border-zinc-500 bg-[#18181b] px-4 py-2.5 text-base text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-300"
-                  />
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showLoginPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Password"
+                      required
+                      className="w-full rounded-xl border-2 border-zinc-500 bg-[#18181b] px-4 pr-11 py-2.5 text-base text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showLoginPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -423,27 +445,55 @@ export const Navbar: React.FC = () => {
                 </div>
                 <div>
                   <label htmlFor="signup-password" className="block text-sm font-medium text-zinc-100 mb-1">Password</label>
-                  <input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Password (min. 6 characters)"
-                    required
-                    className="w-full rounded-xl border-2 border-zinc-500 bg-[#18181b] px-4 py-2.5 text-base text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-300"
-                  />
+                  <div className="relative">
+                    <input
+                      id="signup-password"
+                      type={showSignupPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Password (min. 6 characters)"
+                      required
+                      className="w-full rounded-xl border-2 border-zinc-500 bg-[#18181b] px-4 pr-11 py-2.5 text-base text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="signup-confirm-password" className="block text-sm font-medium text-zinc-100 mb-1">Confirm Password</label>
-                  <input
-                    id="signup-confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    placeholder="Confirm Password"
-                    required
-                    className="w-full rounded-xl border-2 border-zinc-500 bg-[#18181b] px-4 py-2.5 text-base text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-300"
-                  />
+                  <div className="relative">
+                    <input
+                      id="signup-confirm-password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="Confirm Password"
+                      required
+                      className="w-full rounded-xl border-2 border-zinc-500 bg-[#18181b] px-4 pr-11 py-2.5 text-base text-white placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <button
                   type="submit"
