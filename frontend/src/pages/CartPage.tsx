@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   ShoppingBag,
   Trash2,
@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   Sparkles,
-  ScrollText,
   MessageSquare
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -19,31 +18,17 @@ import { orderService } from '../services/orderService';
 import { Order } from '../types';
 import { EmptyState } from '../components/common/EmptyState';
 import { OwnerChatModal, OwnerProfile } from '../components/chat/OwnerChatModal';
-import { TERMS_ACCEPTED_KEY } from './TermsPage';
 
 export const CartPage: React.FC = () => {
   const { cart, loading, updateQuantity, removeFromCart, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const { error } = useToast();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const items = cart?.items || [];
   const queryItemId = searchParams.get('item');
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [isChatOpen, setIsChatOpen] = useState(false);
-
-  // Terms acceptance — stored in sessionStorage by TermsPage
-  const [termsAccepted, setTermsAccepted] = useState(
-    () => sessionStorage.getItem(TERMS_ACCEPTED_KEY) === 'true'
-  );
-
-  // Sync if user navigates back from terms page
-  useEffect(() => {
-    const sync = () => setTermsAccepted(sessionStorage.getItem(TERMS_ACCEPTED_KEY) === 'true');
-    window.addEventListener('focus', sync);
-    return () => window.removeEventListener('focus', sync);
-  }, []);
 
   useEffect(() => {
     if (items.length > 0) {
@@ -121,9 +106,8 @@ export const CartPage: React.FC = () => {
 
   const handleMessageOwner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!termsAccepted) {
-      error('Please read and accept the rental terms before messaging the owner');
-      navigate('/terms');
+    if (!isAuthenticated) {
+      error('Please sign in to message the owner and request rental');
       return;
     }
 
@@ -175,24 +159,9 @@ export const CartPage: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
             <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-violet-400" /> Rental Checkout (1-by-1)
           </h1>
-          {/* Terms & Conditions link row */}
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            {termsAccepted ? (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Terms & Conditions Accepted
-              </span>
-            ) : (
-              <>
-                <span className="text-[11px] text-rose-400 font-medium">⚠ Terms not accepted —</span>
-                <button
-                  onClick={() => navigate('/terms')}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors cursor-pointer"
-                >
-                  <ScrollText className="w-3 h-3" /> Read & Accept Terms
-                </button>
-              </>
-            )}
-          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Review your rental duration, calculate costs, and message item owners directly.
+          </p>
         </div>
 
         {items.length > 0 && (
