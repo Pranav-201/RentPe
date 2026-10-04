@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ChevronLeft,
-  ChevronRight,
   PlusCircle,
 } from 'lucide-react';
-import { Product, Category, Pagination } from '../types';
+import { Product, Category } from '../types';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
 import { ProductCard } from '../components/products/ProductCard';
@@ -20,9 +18,7 @@ import { openSignInModal } from '../config/signInModal';
 export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1, limit: 12, total: 0, pages: 1,
-  });
+  const [visibleCount, setVisibleCount] = useState(8);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,8 +40,8 @@ export const HomePage: React.FC = () => {
     try {
       setLoading(true);
       const res = await productService.getAll({
-        page: pagination.page,
-        limit: pagination.limit,
+        page: 1,
+        limit: 100,
         category: selectedCategory || undefined,
         search: searchQuery || undefined,
         minPrice: minPrice || undefined,
@@ -54,11 +50,10 @@ export const HomePage: React.FC = () => {
         sort: sortBy || undefined,
       });
       setProducts(res.products || []);
-      if (res.pagination) setPagination(res.pagination);
     } catch (err: any) {
       error(err.message || 'Failed to load listings');
     } finally { setLoading(false); }
-  }, [pagination.page, pagination.limit, selectedCategory, searchQuery, minPrice, maxPrice, inStockOnly, sortBy, error]);
+  }, [selectedCategory, searchQuery, minPrice, maxPrice, inStockOnly, sortBy, error]);
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
@@ -70,12 +65,14 @@ export const HomePage: React.FC = () => {
     setMaxPrice('');
     setInStockOnly(false);
     setSortBy('newest');
-    setPagination((prev) => ({ ...prev, page: 1 }));
+    setVisibleCount(8);
   };
 
   const scrollToBrowse = () => {
     document.getElementById('browse-section')?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const visibleProducts = products.slice(0, visibleCount);
 
   return (
     <div>
@@ -92,7 +89,7 @@ export const HomePage: React.FC = () => {
         <div className="flex items-end justify-between border-b border-zinc-800/60 pb-5">
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">Available Rentals</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">{pagination.total} items listed by campus students</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{products.length} items listed by campus students</p>
           </div>
           <Link
             to="/admin"
@@ -112,13 +109,13 @@ export const HomePage: React.FC = () => {
         <ProductFilters
           categories={categories}
           selectedCategory={selectedCategory}
-          onSelectCategory={(id) => { setSelectedCategory(id); setPagination((prev) => ({ ...prev, page: 1 })); }}
+          onSelectCategory={(id) => { setSelectedCategory(id); setVisibleCount(8); }}
           searchQuery={searchQuery}
-          onSearchChange={(q) => { setSearchQuery(q); setPagination((prev) => ({ ...prev, page: 1 })); }}
+          onSearchChange={(q) => { setSearchQuery(q); setVisibleCount(8); }}
           sortBy={sortBy}
-          onSortChange={(sort) => { setSortBy(sort); setPagination((prev) => ({ ...prev, page: 1 })); }}
+          onSortChange={(sort) => { setSortBy(sort); setVisibleCount(8); }}
           inStockOnly={inStockOnly}
-          onToggleInStock={() => { setInStockOnly(!inStockOnly); setPagination((prev) => ({ ...prev, page: 1 })); }}
+          onToggleInStock={() => { setInStockOnly(!inStockOnly); setVisibleCount(8); }}
           onReset={handleResetFilters}
         />
 
@@ -140,31 +137,21 @@ export const HomePage: React.FC = () => {
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 min-[2200px]:grid-cols-6 gap-4 sm:gap-6">
-            {products.map((product) => (
+            {visibleProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>
         )}
 
-        {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-8 border-t border-zinc-800/60">
+        {/* Progressive Load More */}
+        {visibleCount < products.length && (
+          <div className="flex justify-center pt-8 border-t border-zinc-800/60">
             <button
-              onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
-              disabled={pagination.page <= 1}
-              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              type="button"
+              onClick={() => setVisibleCount((prev) => prev + 8)}
+              className="px-6 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/80 text-zinc-200 hover:text-white text-xs sm:text-sm font-semibold shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
             >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs font-mono text-zinc-400 px-3">
-              Page <span className="text-zinc-100 font-bold">{pagination.page}</span> of {pagination.pages}
-            </span>
-            <button
-              onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
-              disabled={pagination.page >= pagination.pages}
-              className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
+              <span>Load More</span>
             </button>
           </div>
         )}
