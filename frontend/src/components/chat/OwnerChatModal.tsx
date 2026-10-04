@@ -73,7 +73,51 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isNearBottomRef = useRef<boolean>(true);
+
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior,
+      });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior });
+    }
+  };
+
+  const handleScroll = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const threshold = 80;
+    const isNear = el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+    isNearBottomRef.current = isNear;
+  };
+
+  // Lock body scroll and adapt to mobile virtual keyboard / viewport changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleViewportChange = () => {
+      if (isNearBottomRef.current) {
+        scrollToBottom('auto');
+      }
+    };
+
+    window.visualViewport?.addEventListener('resize', handleViewportChange);
+    window.visualViewport?.addEventListener('scroll', handleViewportChange);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+    };
+  }, [isOpen]);
 
   // Sync propOrder into activeOrder
   useEffect(() => {
@@ -157,14 +201,9 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
 
     setTimeout(() => {
       inputRef.current?.focus();
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 150);
+      scrollToBottom('auto');
+    }, 100);
   }, [isOpen, activeOrder, currentUser, otherName, productName, orderDays, product]);
-
-  // Auto scroll on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   useEffect(() => {
     const activeToken = firebaseToken || token;
@@ -174,26 +213,32 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
     const handleNewMessage = (message: OrderMessage & { order?: string }) => {
       if (message.order && String(message.order) !== String(activeOrder._id)) return;
 
+      const senderId = typeof message.sender === 'object' ? message.sender._id : message.sender;
+      const isCurrentSender = String(senderId) === String(currentUser?._id);
+
       setMessages((prev) => {
         if (message._id && prev.some((item) => item.id === message._id)) {
           return prev;
         }
 
-        const senderId = typeof message.sender === 'object' ? message.sender._id : message.sender;
         return [
           ...prev,
           {
             id: message._id || `msg-${Date.now()}`,
             senderId: String(senderId),
-            senderName: String(senderId) === String(currentUser?._id) ? 'You' : (message.senderName || otherName),
+            senderName: isCurrentSender ? 'You' : (message.senderName || otherName),
             text: message.text,
             timestamp: message.createdAt
               ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
               : '',
-            isSender: String(senderId) === String(currentUser?._id),
+            isSender: isCurrentSender,
           }
         ];
       });
+
+      if (isCurrentSender || isNearBottomRef.current) {
+        setTimeout(() => scrollToBottom('smooth'), 50);
+      }
     };
 
     const joinRoom = () => socket.emit('joinConversation', activeOrder._id);
@@ -215,6 +260,8 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
     if (!text || sending) return;
 
     setInputText('');
+    isNearBottomRef.current = true;
+    setTimeout(() => scrollToBottom('smooth'), 50);
 
     if (activeOrder?._id) {
       try {
@@ -241,6 +288,10 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
         error(err.message || 'Failed to send message');
       } finally {
         setSending(false);
+        setTimeout(() => {
+          inputRef.current?.focus();
+          scrollToBottom('smooth');
+        }, 50);
       }
     }
   };
@@ -290,12 +341,12 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
 
   return createPortal((
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150 overscroll-none"
       onClick={onClose}
     >
       {/* Compact Chat Modal Window */}
       <div
-        className="w-full sm:max-w-[460px] h-full sm:h-[520px] sm:max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-200"
+        className="w-full sm:max-w-[460px] h-[100dvh] sm:h-[540px] sm:max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-200 overscroll-contain"
         style={{
           background: '#09090b',
           border: '1px solid rgba(255,255,255,0.12)',
@@ -305,7 +356,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
       >
         {/* ── Chat Header ─────────────────────────────────────────────── */}
         <div
-          className="flex items-center justify-between gap-2.5 px-4 py-3 flex-shrink-0"
+          className="flex items-center justify-between gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 flex-shrink-0"
           style={{
             background: '#121215',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -374,7 +425,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
 
         {/* ── Pinned Product Banner ────────────────────────────────────── */}
         <div
-          className="px-4 py-2 flex items-center justify-between gap-3 flex-shrink-0"
+          className="px-3.5 sm:px-4 py-2 flex items-center justify-between gap-2.5 sm:gap-3 flex-shrink-0"
           style={{
             background: '#101014',
             borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -409,7 +460,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
         {/* ── Request Status Banner & Action Options ────────────────────── */}
         {activeOrder && (
           <div
-            className={`px-4 py-2 text-xs flex items-center justify-between gap-2 border-b flex-shrink-0 ${
+            className={`px-3.5 sm:px-4 py-2 text-xs flex items-center justify-between gap-2 border-b flex-shrink-0 ${
               isAccepted
                 ? 'bg-emerald-950/40 border-emerald-800/40 text-emerald-300'
                 : isDeclined
@@ -464,7 +515,9 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
 
         {/* ── Messages Feed ───────────────────────────────────────────── */}
         <div
-          className="flex-1 overflow-y-auto p-3.5 space-y-2.5"
+          ref={messagesContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 space-y-2.5 overscroll-contain"
           style={{
             background: '#09090b',
             backgroundImage: `
@@ -475,15 +528,16 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
             backgroundSize: 'auto, 24px 24px, 24px 24px',
             scrollbarWidth: 'thin',
             scrollbarColor: '#27272a transparent',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex flex-col ${msg.isSender ? 'items-end' : 'items-start'} gap-0.5`}
+              className={`flex flex-col ${msg.isSender ? 'items-end' : 'items-start'} gap-0.5 max-w-full`}
             >
               <div
-                className="max-w-[85%] sm:max-w-[80%] px-3 py-2 text-[12px] leading-relaxed"
+                className="max-w-[85%] sm:max-w-[80%] px-3 py-2 text-[12px] leading-relaxed break-words"
                 style={
                   msg.isSender
                     ? {
@@ -492,12 +546,14 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
                         fontWeight: 500,
                         borderRadius: '12px 12px 3px 12px',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                        overflowWrap: 'anywhere',
                       }
                     : {
                         background: '#18181b',
                         border: '1px solid rgba(255,255,255,0.1)',
                         color: '#f4f4f5',
                         borderRadius: '12px 12px 12px 3px',
+                        overflowWrap: 'anywhere',
                       }
                 }
               >
@@ -506,7 +562,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
                     {msg.senderName}
                   </p>
                 )}
-                <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.text}</p>
               </div>
               <div className="flex items-center gap-1 px-1 text-[9px] text-zinc-500 font-mono">
                 <span>{msg.timestamp}</span>
@@ -520,7 +576,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
 
         {/* ── Input Bar ───────────────────────────────────────────────── */}
         <div
-          className="p-3 flex items-center gap-2 flex-shrink-0"
+          className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center gap-2 flex-shrink-0"
           style={{
             background: '#121215',
             borderTop: '1px solid rgba(255,255,255,0.08)',
@@ -540,7 +596,7 @@ export const OwnerChatModal: React.FC<OwnerChatModalProps> = ({
                 ? 'Type to message owner while pending...'
                 : `Type message to ${otherName}...`
             }
-            className="flex-1 px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none transition-all disabled:opacity-50"
+            className="flex-1 min-w-0 px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none transition-all disabled:opacity-50"
             style={{
               background: '#18181b',
               border: '1px solid rgba(255,255,255,0.1)',
