@@ -377,7 +377,7 @@ export const Navbar: React.FC = () => {
 
               <div className="flex items-center gap-3 text-base text-zinc-400" aria-hidden="true">
                 <span className="h-px flex-1 bg-white/10" />
-                <span className="whitespace-nowrap">Or continue with</span>
+                <span className="whitespace-nowrap">Or</span>
                 <span className="h-px flex-1 bg-white/10" />
               </div>
 
@@ -471,7 +471,7 @@ export const Navbar: React.FC = () => {
 
               <div className="flex items-center gap-3 text-base text-zinc-400" aria-hidden="true">
                 <span className="h-px flex-1 bg-white/10" />
-                <span className="whitespace-nowrap">Or continue with</span>
+                <span className="whitespace-nowrap">Or</span>
                 <span className="h-px flex-1 bg-white/10" />
               </div>
 
