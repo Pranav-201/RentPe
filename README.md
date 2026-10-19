@@ -1,68 +1,392 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="RentPe — Rent what you need. Share what you have." xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo4NmFkNjcyNy1jZGUxLTQ2MTMtYmExNi0wNDIzZGYyMmEwYjgAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaKa2PVjcVCJTVZcLeQyeQn8AAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpjZTFhZjdmOC0wOGI4LTQ3ZjUtODJlNy1hZmI3YmM0N2Y1MTBscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNol55/Bfxtt79M16bhWG8J/gAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggb5N0OrAYpF3GqcwsLmIuHsNsrVgxH1UwGgakB8d6cQCkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaPwaBFpZVeHvqnvEOlnxus4AAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCD8IVBEdxfbTg9KNRdE7AinEvyv65RVEKMBvNLa2YvHGmRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBjkZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjg2YWQ2NzI3LWNkZTEtNDYxMy1iYTE2LTA0MjNkZjIyYTBiOC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmVmMzFjMTIzLTNjZDEtNGVhMS1iZWMyLTNlYWIwNTEzMjBlNHJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBvk3Q6sBikXcapzCwuYi4ew2ytWDEfVTAaBqQHx3pxAKJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggfcMPD39kwSaHcwdo2aG08occgUZWdABSHod0bR7oX0aiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg+8qLojwhehJsnYFopWH/k2mAysV+OW7Ph3Ow6QolSY90Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQESZdSiwQCbJDpLXCneAtuCCtA0Cxd6FcjyU/SQ4F5LqeZ+vW4VRv5mDZSXxjgi/4d/nEKObAN0NDs6YiKk3eZ0=</c2pa:manifest></metadata>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4f46e5"/>
-      <stop offset="50%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#ec4899"/>
-    </linearGradient>
-    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-    <clipPath id="round"><rect width="1200" height="400" rx="28"/></clipPath>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1e1b4b" flood-opacity="0.35"/>
-    </filter>
-  </defs>
-  <style>
-    .title { font: 800 108px 'Segoe UI', Helvetica, Arial, sans-serif; fill: #fff; letter-spacing: -3px; }
-    .tag   { font: 600 30px 'Segoe UI', Helvetica, Arial, sans-serif; fill: #fff; opacity: .95; }
-    .sub   { font: 500 20px 'Segoe UI', Helvetica, Arial, sans-serif; fill: #e0e7ff; letter-spacing: 3px; }
-    .emoji { font-size: 44px; }
-    .card  { fill: #ffffff; fill-opacity: .16; stroke: #ffffff; stroke-opacity: .45; stroke-width: 1.5; }
-    .float1 { animation: f1 5s ease-in-out infinite; }
-    .float2 { animation: f2 6s ease-in-out infinite; }
-    .float3 { animation: f3 7s ease-in-out infinite; }
-    .float4 { animation: f1 5.5s ease-in-out infinite .8s; }
-    .float5 { animation: f2 6.5s ease-in-out infinite .4s; }
-    .orb1 { animation: pulse 6s ease-in-out infinite; transform-origin: 160px 90px; }
-    .orb2 { animation: pulse 8s ease-in-out infinite 1s; transform-origin: 1040px 330px; }
-    .sweep { animation: sweep 5s linear infinite; }
-    .in1 { animation: rise 1s ease-out both; }
-    .in2 { animation: rise 1s ease-out .35s both; }
-    .in3 { animation: rise 1s ease-out .7s both; }
-    @keyframes f1 { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-18px) rotate(4deg); } }
-    @keyframes f2 { 0%,100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-24px) rotate(-5deg); } }
-    @keyframes f3 { 0%,100% { transform: translateY(-6px); } 50% { transform: translateY(14px); } }
-    @keyframes pulse { 0%,100% { transform: scale(1); opacity: .25; } 50% { transform: scale(1.25); opacity: .4; } }
-    @keyframes sweep { from { transform: translateX(-1300px); } to { transform: translateX(1300px); } }
-    @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+<div align="center">
 
-  <g clip-path="url(#round)">
-    <rect width="1200" height="400" fill="url(#bg)"/>
-    <circle class="orb1" cx="160" cy="90" r="150" fill="#ffffff" opacity=".25"/>
-    <circle class="orb2" cx="1040" cy="330" r="190" fill="#fbbf24" opacity=".25"/>
-    <circle cx="620" cy="-40" r="120" fill="#22d3ee" opacity=".18"/>
-    <rect class="sweep" x="0" y="0" width="260" height="400" fill="url(#shine)" transform="skewX(-20)"/>
+# RentPe
 
-    <!-- floating item cards -->
-    <g filter="url(#soft)">
-      <g class="float1"><g transform="translate(90,230)"><rect class="card" width="96" height="96" rx="24"/><text class="emoji" x="48" y="64" text-anchor="middle">🧮</text></g></g>
-      <g class="float2"><g transform="translate(215,95)"><rect class="card" width="96" height="96" rx="24"/><text class="emoji" x="48" y="64" text-anchor="middle">📽️</text></g></g>
-      <g class="float3"><g transform="translate(940,70)"><rect class="card" width="96" height="96" rx="24"/><text class="emoji" x="48" y="64" text-anchor="middle">🚲</text></g></g>
-      <g class="float4"><g transform="translate(1060,210)"><rect class="card" width="96" height="96" rx="24"/><text class="emoji" x="48" y="64" text-anchor="middle">📷</text></g></g>
-      <g class="float5"><g transform="translate(890,285)"><rect class="card" width="84" height="84" rx="22"/><text class="emoji" x="42" y="58" text-anchor="middle">🍳</text></g></g>
-    </g>
+**Rent what you need. Share what you have.**
 
-    <!-- text -->
-    <text class="sub in1" x="600" y="98" text-anchor="middle">PEER-TO-PEER · CAMPUS · SUSTAINABLE</text>
-    <text class="title in1" x="600" y="205" text-anchor="middle">RentPe</text>
-    <text class="tag in2" x="600" y="262" text-anchor="middle">Rent what you need. Share what you have.</text>
-    <g class="in3">
-      <rect x="440" y="298" width="320" height="52" rx="26" fill="#ffffff"/>
-      <text x="600" y="333" text-anchor="middle" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#6d28d9">Don't buy it. Rent it. 🎓</text>
-    </g>
-  </g>
-</svg>
+A peer-to-peer rental marketplace built for student communities.
+
+<br/>
+
+![Backend](https://img.shields.io/badge/Backend-Zingoo.js-000000?style=flat-square&labelColor=000000)
+![AI](https://img.shields.io/badge/AI-RAG-000000?style=flat-square&labelColor=000000)
+![Cloud](https://img.shields.io/badge/Cloud-Google_Cloud_Run-000000?style=flat-square&labelColor=000000)
+![Frontend](https://img.shields.io/badge/Frontend-Vercel-000000?style=flat-square&labelColor=000000)
+![Status](https://img.shields.io/badge/Status-Active-000000?style=flat-square&labelColor=000000)
+
+<br/>
+
+[Problem](#the-problem) · [Solution](#our-solution) · [Features](#key-features) · [Tech Stack](#tech-stack) · [Zingoo](#powered-by-zingoojs) · [Benchmarks](#performance--benchmarks) · [Architecture](#architecture)
+
+</div>
+
+---
+
+## Overview
+
+RentPe makes underutilized student-owned items available to other students who need them temporarily.
+
+Students often buy products they only use occasionally, while other students need those same products but can't justify buying them. RentPe connects the two in one campus marketplace: discover items, contact owners, and make better use of what already exists.
+
+> **Mission:** Turn idle student-owned products into useful, shareable resources.
+
+---
+
+## The Problem
+
+| | |
+|---|---|
+| **Money spent on rarely-used items** | Calculators, projectors, tripods, bicycles, induction stoves. Often needed for one assignment, event, or semester, and expensive on a student budget. |
+| **Useful products sit idle** | Students own plenty that goes unused, while others buy duplicates because they never knew an item was available nearby. |
+| **Trustworthy options are hard to find** | Scattered social groups, one-by-one messages, and word of mouth make discovery slow and unreliable. |
+| **Not built for campus communities** | Traditional rental services focus on specific categories, locations, or commercial deals, not everyday items within your own community. |
+
+> The problem isn't a lack of products. It's the lack of an efficient way to connect people who own useful things with people who need them temporarily.
+
+---
+
+## Our Solution
+
+RentPe replaces a fragmented, informal process with one student-to-student marketplace.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### For renters
+
+1. Discover products available for rent
+2. Explore items and their details
+3. Find what matches your temporary need
+4. Connect directly with the owner
+5. Coordinate the rental instead of buying
+
+</td>
+<td width="50%" valign="top">
+
+### For owners
+
+1. List products you're willing to rent
+2. Make unused items discoverable
+3. Connect with interested students
+4. Earn from resources that would sit idle
+
+</td>
+</tr>
+</table>
+
+| Traditional approach | With RentPe |
+|---|---|
+| Buy products for temporary needs | Explore rental alternatives |
+| Search through scattered groups | Discover items in one marketplace |
+| Depend on word of mouth | Make listings discoverable |
+| Leave unused products idle | Put existing resources to use |
+| Coordinate without a central platform | Find products and contact owners in one place |
+
+---
+
+## Key Features
+
+- **Peer-to-peer rentals:** connect students who own products with students who need them
+- **Product discovery:** explore available items and relevant product information
+- **Owner listings:** make underutilized products available to the community
+- **Owner communication:** contact owners directly to discuss rentals
+- **Authentication:** Firebase Authentication with email/password and Google sign-in
+- **AI-powered discovery:** a retrieval-augmented generation (RAG) approach for finding products with natural-language queries
+- **Semantic search:** embeddings and a vector database to retrieve relevant product information
+- **Cloud deployment:** frontend and backend deployed as separate services
+- **Containerized backend:** Docker for consistent packaging and deployment
+
+> Feature availability may evolve during development. Refer to the deployed application and repository for the current implementation.
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React · Vite · Tailwind CSS · Firebase Authentication · Vercel |
+| **Backend** | Node.js · Zingoo.js · MongoDB Atlas · Firebase Admin · Cloudinary · Docker · Google Cloud Run |
+| **AI / RAG** | Groq (LLM inference) · Gemini (alternate / fallback) · Embeddings · Pinecone (vector search) |
+
+<details>
+<summary><b>What each piece does</b></summary>
+
+<br/>
+
+| Technology | Purpose |
+|---|---|
+| React | Component-based user interface |
+| Vite | Frontend development and build tooling |
+| Tailwind CSS | Responsive styling |
+| Firebase Authentication | User sign-in and identity |
+| Vercel | Frontend deployment |
+| Node.js | JavaScript runtime |
+| Zingoo.js | Backend framework and application infrastructure |
+| MongoDB Atlas | Persistent application data |
+| Firebase Admin | Backend identity verification |
+| Cloudinary | Product image storage and delivery |
+| Docker | Containerized backend deployment |
+| Google Cloud Run | Backend hosting and scaling |
+| Groq | LLM inference |
+| Gemini | Alternative LLM provider / fallback |
+| Embeddings | Semantic representation of product information |
+| Pinecone | Vector storage and similarity search |
+
+</details>
+
+**AI pipeline**
+
+```text
+Product Data → Chunking / Preparation → Embeddings → Pinecone → Retrieval → LLM Response
+```
+
+The exact steps depend on the type of query and the implemented retrieval pipeline.
+
+---
+
+## Powered by Zingoo.js
+
+RentPe's backend runs on **Zingoo.js**, a Node.js backend framework I'm building as an open-source project.
+
+[Website](https://zingoo.dev) · [GitHub](https://github.com/Pranav-201/Zingoo-The_Future_Backend) · [Documentation](https://zingoo-docs.vercel.app)
+
+### Why build RentPe with Zingoo?
+
+Modern applications combine traditional backend work with AI capabilities. Developers often assemble separate libraries, configure integrations, and handle provider-specific behavior before they can focus on application logic.
+
+Zingoo aims to reduce that overhead with a unified, developer-friendly backend experience, including AI and RAG capabilities. RentPe is the real-world application where that approach is built and validated.
+
+### What this demonstrates
+
+- **Real-world usage:** Zingoo powers an actual marketplace, not only isolated examples
+- **Backend development:** application APIs and supporting service integrations
+- **AI integration:** LLM providers and retrieval infrastructure working together
+- **Production deployment:** packaged and deployed on Google Cloud Run
+- **Integration testing:** validating important behavior and integrations
+- **Framework feedback:** real friction points drive improvements to Zingoo
+
+> The goal isn't to replace every backend framework. It's to explore whether a more integrated developer experience can reduce the work needed to build modern, AI-enabled backend applications.
+
+---
+
+## Performance & Benchmarks
+
+Backend quality isn't only how quickly a developer writes code. It also depends on runtime performance, maintainability, reliability, integration complexity, and operational overhead.
+
+<details>
+<summary><b>1. Developer productivity</b></summary>
+
+<br/>
+
+Zingoo aims to reduce development time by simplifying common backend and AI integration workflows:
+
+- Less repetitive integration code
+- Fewer manual steps when configuring AI capabilities
+- A more consistent application structure
+- Less effort connecting providers and retrieval components
+- Faster iteration from implementation to testing
+
+These are productivity goals, not claims of measured time savings. A fair comparison must use the same requirements, features, and acceptance criteria.
+
+</details>
+
+<details>
+<summary><b>2. Runtime performance</b></summary>
+
+<br/>
+
+| Metric | What it measures |
+|---|---|
+| p50 latency | Typical request latency |
+| p95 latency | Latency of slower requests |
+| p99 latency | Tail latency |
+| Requests per second | Throughput |
+| Error rate | Percentage of failed requests |
+| CPU and memory | Resource use under load |
+
+</details>
+
+<details>
+<summary><b>3. AI integration performance</b></summary>
+
+<br/>
+
+Application overhead is separated from model wait time:
+
+- Context preparation and retrieval time
+- Vector-search latency
+- Time to first token (where streaming is supported)
+- Total LLM response time
+- End-to-end request latency
+- Token usage and provider cost
+
+A framework can make integration simpler without making the underlying model faster, so these are measured separately.
+
+</details>
+
+<details>
+<summary><b>4. Reproducible methodology</b></summary>
+
+<br/>
+
+1. Implement the same API endpoints and business logic
+2. Use equivalent database queries and indexes
+3. Keep hardware, region, payloads, and test duration consistent
+4. Warm up both implementations before measuring
+5. Test at multiple levels of concurrent load
+6. Run repeated trials and report the results
+7. Separate cold starts, database latency, and external LLM latency from application overhead
+
+Example tools: `autocannon` for HTTP load testing, `perf_hooks` for Node.js timing.
+
+</details>
+
+### Results
+
+| Metric | Result |
+|---|---|
+| Backend development time | Not yet independently benchmarked |
+| p50 / p95 / p99 latency | Not yet published |
+| Requests per second | Not yet published |
+| Memory under load | Not yet published |
+| AI integration time saved | Not yet independently measured |
+
+**Objective:** show whether Zingoo can reduce backend development effort and AI integration complexity while meeting the runtime and reliability needs of a real application. Results will be added once repeatable tests have been run.
+
+---
+
+## Architecture
+
+```text
+                    Student / User
+                          │
+                          ▼
+                 React + Vite UI  (Vercel)
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+        Firebase Auth          Zingoo Backend  (Google Cloud Run)
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              ▼                       ▼                       ▼
+        MongoDB Atlas            Cloudinary             AI / RAG Layer
+                                                              │
+                                                    ┌─────────┴─────────┐
+                                                    ▼                   ▼
+                                                Pinecone         LLM Providers
+                                                                 (Groq / Gemini)
+```
+
+Firebase handles authentication, MongoDB stores application data, Cloudinary handles images, and the AI layer uses retrieval and language-model services where required.
+
+---
+
+## Security & Reliability
+
+- Verify Firebase identity tokens on protected backend endpoints
+- Enforce authorization on user-specific and owner-specific operations
+- Validate request payloads and reject invalid inputs
+- Keep API keys and secrets in environment variables or a managed secret store
+- Never expose private credentials in frontend code
+- Apply suitable rate limits and error handling
+- Validate product ownership before allowing protected modifications
+- Monitor backend logs, resource usage, and request failures
+
+These are security requirements and engineering practices. Verify the exact implementation against the current codebase.
+
+---
+
+## Deployment
+
+| Layer | Service |
+|---|---|
+| Frontend | Vercel |
+| Backend | Google Cloud Run |
+| Database | MongoDB Atlas |
+| Authentication | Firebase Authentication |
+| Image delivery | Cloudinary |
+| Vector search | Pinecone |
+
+Separating these layers lets the frontend, backend, database, and AI services be managed independently.
+
+---
+
+## Roadmap
+
+- [ ] Rental request and availability management
+- [ ] Rental duration and pricing workflows
+- [ ] Owner and renter ratings and reviews
+- [ ] Notifications for rental requests and updates
+- [ ] More advanced semantic product discovery
+- [ ] Improved AI-assisted recommendations
+- [ ] Automated end-to-end and load testing
+- [ ] Published, reproducible backend and AI benchmarks
+- [ ] Better monitoring and observability
+
+The roadmap is subject to implementation priorities and user feedback.
+
+---
+
+## Getting Started
+
+**Prerequisites**
+
+- Node.js and npm
+- MongoDB Atlas connection string
+- Firebase project configuration
+- Cloudinary credentials
+- Pinecone credentials (for AI retrieval features)
+- Supported LLM provider credentials (for AI features)
+
+**Installation**
+
+```bash
+git clone <YOUR_RENTPE_REPOSITORY_URL>
+cd RentPe
+npm install
+```
+
+Configure your environment variables using the project's environment example file, then start the app:
+
+```bash
+npm run dev
+```
+
+> Exact commands may differ if the repository has separate frontend and backend packages. Follow the scripts and setup instructions in each project directory.
+
+---
+
+## About the Developer
+
+Built by **Pranav Amrutkar**, a software developer interested in backend engineering, AI systems, cloud infrastructure, and developer tools.
+
+Alongside RentPe, I'm developing **Zingoo.js**, an open-source Node.js backend framework focused on making modern backend and AI application development more integrated and developer-friendly.
+
+[Portfolio](https://amrutkarpranav.tech) · [GitHub](https://github.com/Pranav-201) · [LinkedIn](https://www.linkedin.com/in/pranavamrutkar20/) · [Zingoo](https://zingoo.dev)
+
+---
+
+## Contributing
+
+Contributions, bug reports, and suggestions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Implement and test your changes
+4. Submit a pull request describing the change
+
+Please open an issue to discuss significant feature proposals before starting larger changes.
+
+## License
+
+See the repository's `LICENSE` file for license and usage terms.
+
+---
+
+<div align="center">
+
+**RentPe**
+Rent what you need. Share what you have.
+
+</div>
